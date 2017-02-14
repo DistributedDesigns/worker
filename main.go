@@ -34,29 +34,44 @@ var (
 			ExistingFile()
 
 	consoleLog = logging.MustGetLogger("console")
+	done       = make(chan struct{})
 
-	redisPool *redis.Pool
-	rmqConn   *amqp.Connection
+	redisBaseKey string
+	redisPool    *redis.Pool
+	rmqConn      *amqp.Connection
 )
 
 const (
 	// Named RMQ queues / exchanges
 	auditEventQ      = "audit_event"
 	dumplogQ         = "dumplog"
+	quoteRequestQ    = "quote_req"
 	quoteBroadcastEx = "quote_broadcast"
 )
 
 func main() {
+	// Load the config
 	kingpin.Parse()
-
 	initConsoleLogging()
-
 	loadConfig()
+	redisBaseKey = fmt.Sprintf("%s%d:", config.Redis.KeyPrefix, *workerNum)
 
+	// Connect to external services
 	initRMQ()
 	defer rmqConn.Close()
-
 	initRedis()
+
+	// Start internal services
+	initQuoteCacheRMQ()
+
+	// Start concurrent actions
+	go catchQuoteBroadcasts()
+	// watch auto transactions
+	// watch transaction queue
+	// handle transactions
+
+	// halt until channel is closed
+	<-done
 }
 
 func failOnError(err error, msg string) {
