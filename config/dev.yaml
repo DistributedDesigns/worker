@@ -1,0 +1,22 @@
+rabbit:
+  host: "localhost"
+  port: 44430
+  user: "guest"
+  pass: "guest"
+
+redis:
+  host: "localhost"
+  port: 44431
+  max idle connections: 5
+  max active connections: 0 # 0 = unlimited
+  idle timeout: 30 # seconds
+  key prefix: "worker:"
+
+# This defines the retention policy for quotes in the cache.
+# Each quote is valid for 60s from the timestamp returned from the
+# quoteserver. We want to stagger the times that quotes expire
+# so we don't get synchronized refresh cycles.
+# Each quote is good for (base + random backoff) in seconds.
+quote policy:
+  base ttl: 55
+  backoff ttl: 4 # ranges 0 -> n
