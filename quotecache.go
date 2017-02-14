@@ -1,8 +1,12 @@
 package main
 
 import (
-	"github.com/distributeddesigns/shared_types"
+	"math/rand"
+	"time"
 
+	types "github.com/distributeddesigns/shared_types"
+
+	"github.com/garyburd/redigo/redis"
 	"github.com/streadway/amqp"
 )
 
@@ -81,7 +85,7 @@ func catchQuoteBroadcasts() {
 			}
 
 			consoleLog.Infof(" [↙] Intercepted quote: %s %s", q.Stock, q.Price)
-			cacheQuote(q)
+			go cacheQuote(q)
 		}
 	}()
 
@@ -89,5 +93,26 @@ func catchQuoteBroadcasts() {
 }
 
 func cacheQuote(q types.Quote) {
-	consoleLog.Warning("You really should cache this:", q.Stock)
+	quoteAge := time.Now().Unix() - q.Timestamp.Unix()
+	ttl := config.QuotePolicy.BaseTTL - rand.Intn(config.QuotePolicy.BackoffTTL) - int(quoteAge)
+
+	if ttl < config.QuotePolicy.MinTTL {
+		consoleLog.Debugf("Not caching %s since TTL is %d", q.Stock, ttl)
+		return
+	}
+
+	conn := redisPool.Get()
+	defer conn.Close()
+
+	quoteKey := getQuoteKey(q.Stock)
+	serializedQuote := q.ToCSV()
+	_, err := redis.String(conn.Do("SETEX", quoteKey, ttl, serializedQuote))
+	failOnError(err, "Could not update quote in redis")
+
+	consoleLog.Debugf("Updated %s:%+v", quoteKey, serializedQuote)
+	consoleLog.Debugf("%s will expire in %d sec", quoteKey, ttl)
+}
+
+func getQuoteKey(stock string) string {
+	return redisBaseKey + "quotes:" + stock
 }

@@ -13,5 +13,6 @@ redis:
   key prefix: "worker:"
 
 quote policy:
-  base ttl: 55
+  base ttl: 59
   backoff ttl: 4
+  min ttl: 3

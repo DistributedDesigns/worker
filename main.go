@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"strings"
 	"time"
@@ -50,6 +51,8 @@ const (
 )
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
+
 	// Load the config
 	kingpin.Parse()
 	initConsoleLogging()
@@ -125,6 +128,7 @@ var config struct {
 	QuotePolicy struct {
 		BaseTTL    int `yaml:"base ttl"`
 		BackoffTTL int `yaml:"backoff ttl"`
+		MinTTL     int `yaml:"min ttl"`
 	} `yaml:"quote policy"`
 }
 

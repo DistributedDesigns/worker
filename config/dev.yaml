@@ -16,7 +16,8 @@ redis:
 # Each quote is valid for 60s from the timestamp returned from the
 # quoteserver. We want to stagger the times that quotes expire
 # so we don't get synchronized refresh cycles.
-# Each quote is good for (base + random backoff) in seconds.
+# Each quote is good for (base - random backoff) in seconds.
 quote policy:
-  base ttl: 55
+  base ttl: 59
   backoff ttl: 4 # ranges 0 -> n
+  min ttl: 3 # Don't cache quotes with less than this TTL
