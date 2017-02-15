@@ -5,7 +5,7 @@ func txWorker(unprocessedTxs <-chan string) {
 		select {
 		case <-done:
 			consoleLog.Notice(" [x] Finished processing transactions")
-			cleanUpTransactions(unprocessedTxs)
+			cleanUpTxs(unprocessedTxs)
 			return
 		default:
 			processTxs(unprocessedTxs)
@@ -22,6 +22,7 @@ func processTxs(unprocessedTxs <-chan string) {
 	cmd := parseCommand(<-unprocessedTxs)
 	cmd.Execute()
 	// (go) log command
+	consoleLog.Noticef(" [✔] Finished", cmd.Name())
 }
 
 func abortTx(msg string) {
@@ -36,11 +37,11 @@ func abortTxOnError(err error, msg string) {
 
 func catchAbortedTx() {
 	if r := recover(); r != nil {
-		consoleLog.Error("Aborted transaction:", r)
+		consoleLog.Error(" [x] Aborted transaction:", r)
 	}
 }
 
-func cleanUpTransactions(unprocessedTxs <-chan string) {
+func cleanUpTxs(unprocessedTxs <-chan string) {
 	// TODO: Put these back in redis? Just warn for now.
 	if len(unprocessedTxs) > 0 {
 		for i := 0; i < len(unprocessedTxs); i++ {

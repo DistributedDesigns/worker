@@ -2,9 +2,11 @@ package main
 
 import (
 	"math/rand"
+	"strconv"
 	"time"
 
 	types "github.com/distributeddesigns/shared_types"
+	"github.com/garyburd/redigo/redis"
 
 	"github.com/streadway/amqp"
 )
@@ -114,4 +116,115 @@ func cacheQuote(q types.Quote) {
 
 func getQuoteKey(stock string) string {
 	return redisBaseKey + "quotes:" + stock
+}
+
+// getQuote checks local redis for a quote
+func getQuote(qr types.QuoteRequest) types.Quote {
+	conn := redisPool.Get()
+	defer conn.Close()
+
+	quoteKey := getQuoteKey(qr.Stock)
+	r, err := redis.String(conn.Do("GET", quoteKey))
+	if err == redis.ErrNil {
+		return getFreshQuote(qr)
+	} else if err != nil {
+		failOnError(err, "Could not retrieve quote from redis")
+	}
+
+	consoleLog.Debug(" [✔] Cache hit:", quoteKey)
+	quote, err := types.ParseQuote(r)
+	failOnError(err, "Could not parse quote from redis value")
+
+	return quote
+}
+
+// getFreshQuote makes a request for a new quote to the quote service over RMQ
+func getFreshQuote(qr types.QuoteRequest) types.Quote {
+	consoleLog.Debug(" [x] Cache miss:", qr.ID, qr.Stock)
+
+	freshQuotes := make(chan types.Quote, 1)
+	ready := make(chan struct{}, 1)
+
+	go watchForQuoteUpdate(qr, freshQuotes, ready)
+	go requestQuote(qr, ready)
+
+	return <-freshQuotes
+}
+
+func watchForQuoteUpdate(qr types.QuoteRequest, freshQuotes chan<- types.Quote, ready chan<- struct{}) {
+	ch, err := rmqConn.Channel()
+	failOnError(err, "Failed to open a channel")
+	defer ch.Close()
+
+	// Anonymous Q that filters for fresh stock broadcasts
+	q, err := ch.QueueDeclare(
+		"",    // name
+		false, // durable
+		true,  // delete when unused
+		true,  // exclusive
+		false, // no wait
+		nil,   // arguments
+	)
+	failOnError(err, "Failed to declare a queue")
+
+	err = ch.QueueBind(
+		q.Name,            // name
+		qr.Stock+".fresh", // routing key
+		quoteBroadcastEx,  // exchange
+		false,             // no-wait
+		nil,               // args
+	)
+	failOnError(err, "Failed to bind a queue")
+
+	msgs, err := ch.Consume(
+		q.Name, // queue
+		"",     // consumer
+		true,   // auto-ack
+		true,   // exclusive
+		false,  // no-local
+		false,  // no-wait
+		nil,    // args
+	)
+	failOnError(err, "Failed to register a consumer")
+
+	// Send the request for a new quote by unblocking requestQuote()
+	consoleLog.Debug(" [-] Waiting for updates to", qr.Stock)
+	ready <- struct{}{}
+
+	// Hold here until RMQ quote update
+	for d := range msgs {
+		quote, err := types.ParseQuote(string(d.Body))
+		failOnError(err, "Could not parse quote from RMQ")
+
+		freshQuotes <- quote
+		break
+	}
+}
+
+func requestQuote(qr types.QuoteRequest, ready <-chan struct{}) {
+	// Hold for quote watcher to create queue
+	<-ready
+
+	consoleLog.Debug(" [↑] Requesting new quote for", qr.Stock)
+
+	ch, err := rmqConn.Channel()
+	failOnError(err, "Failed to open a channel")
+	defer ch.Close()
+
+	header := amqp.Table{
+		"serviceID": redisBaseKey,
+	}
+
+	err = ch.Publish(
+		"",            // exchange
+		quoteRequestQ, // routing key
+		false,         // mandatory
+		false,         // immediate
+		amqp.Publishing{
+			Headers:       header,
+			CorrelationId: strconv.FormatInt(int64(qr.ID), 10),
+			ContentType:   "text/plain",
+			Body:          []byte(qr.ToCSV()),
+		})
+	failOnError(err, "Failed to publish a message")
 }

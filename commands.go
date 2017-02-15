@@ -59,7 +59,7 @@ func parseQuoteCmd(parts []string) quoteCmd {
 		abortTx("QUOTE needs 4 parts")
 	}
 
-	id, err := strconv.Atoi(parts[0])
+	id, err := strconv.ParseUint(parts[0], 10, 64)
 	abortTxOnError(err, "Could not parse ID")
 
 	return quoteCmd{
