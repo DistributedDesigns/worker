@@ -77,7 +77,7 @@ func main() {
 	go catchQuoteBroadcasts()
 	// watch auto transactions
 	go fetchNewTx(unprocessedTxs)
-	go transactionWorker(unprocessedTxs)
+	go txWorker(unprocessedTxs)
 
 	// halt until channel is closed
 	<-done
