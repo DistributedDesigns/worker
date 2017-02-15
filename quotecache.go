@@ -85,7 +85,7 @@ func catchQuoteBroadcasts() {
 				break
 			}
 
-			consoleLog.Infof(" [↙] Intercepted quote: %s %s", q.Stock, q.Price)
+			consoleLog.Debugf(" [↙] Intercepted quote: %s %s", q.Stock, q.Price)
 			go cacheQuote(q)
 		}
 	}()

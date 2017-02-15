@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/streadway/amqp"
 )
 
 type command interface {
@@ -67,4 +69,29 @@ func parseQuoteCmd(parts []string) quoteCmd {
 		userID: parts[2],
 		stock:  parts[3],
 	}
+}
+
+func sendToAuditLog(cmd command) {
+	ch, err := rmqConn.Channel()
+	failOnError(err, "Failed to open a channel")
+	defer ch.Close()
+
+	header := amqp.Table{
+		"name":      cmd.Name(),
+		"serviceID": redisBaseKey,
+	}
+
+	err = ch.Publish(
+		"",          // exchange
+		auditEventQ, // routing key
+		false,       // mandatory
+		false,       // immediate
+		amqp.Publishing{
+			Headers:     header,
+			ContentType: "text/plain",
+			Body:        []byte(cmd.ToAuditEntry()),
+		})
+	failOnError(err, "Failed to publish a message")
+
+	consoleLog.Debug("Sent audit log")
 }

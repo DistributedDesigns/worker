@@ -41,6 +41,4 @@ func (q quoteCmd) Execute() {
 
 	// TODO: actually return a response
 	_ = getQuote(qr)
-
-	consoleLog.Noticef(" [%03d] QUOTE finished", q.id)
 }
