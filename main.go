@@ -48,6 +48,9 @@ const (
 	dumplogQ         = "dumplog"
 	quoteRequestQ    = "quote_req"
 	quoteBroadcastEx = "quote_broadcast"
+
+	// Redis settings
+	pendingTxTimeout = 3
 )
 
 func main() {
@@ -67,11 +70,14 @@ func main() {
 	// Start internal services
 	initQuoteCacheRMQ()
 
+	// Capped channel of tx pulled out of redis
+	unprocessedTxs := make(chan string, 2)
+
 	// Start concurrent actions
 	go catchQuoteBroadcasts()
 	// watch auto transactions
-	// watch transaction queue
-	// handle transactions
+	go fetchNewTx(unprocessedTxs)
+	go transactionWorker(unprocessedTxs)
 
 	// halt until channel is closed
 	<-done
