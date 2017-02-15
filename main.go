@@ -96,7 +96,7 @@ func initConsoleLogging() {
 
 	// Add output formatting
 	var consoleFormat = logging.MustStringFormatter(
-		`%{time:15:04:05.000} %{color}▶ %{level:8s}%{color:reset} %{id:03d} %{message}  %{shortfile}`,
+		`%{time:15:04:05.000} %{color}▶ %{level:8s}%{color:reset} %{id:03d} %{message} %{shortfile}`,
 	)
 	consoleBackendFormatted := logging.NewBackendFormatter(consoleBackend, consoleFormat)
 

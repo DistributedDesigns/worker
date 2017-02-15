@@ -6,7 +6,6 @@ import (
 
 	types "github.com/distributeddesigns/shared_types"
 
-	"github.com/garyburd/redigo/redis"
 	"github.com/streadway/amqp"
 )
 
@@ -106,7 +105,7 @@ func cacheQuote(q types.Quote) {
 
 	quoteKey := getQuoteKey(q.Stock)
 	serializedQuote := q.ToCSV()
-	_, err := redis.String(conn.Do("SETEX", quoteKey, ttl, serializedQuote))
+	_, err := conn.Do("SETEX", quoteKey, ttl, serializedQuote)
 	failOnError(err, "Could not update quote in redis")
 
 	consoleLog.Debugf("Updated %s:%+v", quoteKey, serializedQuote)

@@ -17,7 +17,7 @@ func fetchNewTx(unprocessedTxs chan<- string) {
 			// Block until something is returned from redis, or timeout
 			r, err := redis.Values(conn.Do("BLPOP", pendingTxKey, pendingTxTimeout))
 			if err == redis.ErrNil {
-				consoleLog.Info("No new entries in", pendingTxKey)
+				consoleLog.Debug("No new entries in", pendingTxKey)
 				break
 			} else if err != nil {
 				failOnError(err, "Could not retrieve tx from redis")
