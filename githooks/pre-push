@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Run the linter on all files in directory
+$GOPATH/bin/gometalinter --config=.gometalinterrc ./...
+
+if [ $? -ne 0 ]; then
+  echo "✗ Linter failed. Branch not pushed to remote."
+  exit 1
+else
+  echo "✔ Linter passed"
+fi

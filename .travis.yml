@@ -1,0 +1,19 @@
+language: go
+
+go:
+  - 1.7.4
+  - tip
+
+before_install:
+  - go get -u github.com/alecthomas/gometalinter
+  - gometalinter --install
+
+install:
+  - go get
+  - go build .
+
+script:
+  - gometalinter --config=.gometalinterrc ./...
+
+notifications:
+  email: false
