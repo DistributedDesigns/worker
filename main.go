@@ -33,6 +33,10 @@ var (
 			Default("./config/dev.yaml").
 			Short('c').
 			ExistingFile()
+	noAudit = kingpin.
+		Flag("no-audit", "Do not send messages to the audit server").
+		Short('a').
+		Bool()
 
 	consoleLog = logging.MustGetLogger("console")
 	done       = make(chan struct{})

@@ -70,6 +70,10 @@ func parseCommand(s string) command {
 }
 
 func sendToAuditLog(cmd command) {
+	if *noAudit {
+		return
+	}
+
 	ch, err := rmqConn.Channel()
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
