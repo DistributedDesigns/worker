@@ -1,0 +1,15 @@
+#!/bin/sh
+
+echo "Installing worker"
+go get
+go install
+
+# test if file exists
+if [ ! -f $GOPATH/bin/gometalinter ]; then
+  echo "Installing gometalinter"
+  go get -u github.com/alecthomas/gometalinter
+  $GOPATH/bin/gometalinter --install
+fi
+
+echo "Installing git hooks"
+ln -s $PWD/githooks/pre-push $PWD/.git/hooks/pre-push

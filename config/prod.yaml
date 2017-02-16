@@ -1,0 +1,18 @@
+rabbit:
+  host: "localhost"
+  port: 44430
+  user: "guest"
+  pass: "guest"
+
+redis:
+  host: "localhost"
+  port: 44431
+  max idle connections: 5
+  max active connections: 0
+  idle timeout: 30
+  key prefix: "worker:"
+
+quote policy:
+  base ttl: 59
+  backoff ttl: 4
+  min ttl: 3
