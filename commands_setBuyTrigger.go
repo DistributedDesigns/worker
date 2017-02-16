@@ -23,12 +23,14 @@ func parseSetBuyTriggerCmd(parts []string) setBuyTriggerCmd {
 	id, err := strconv.ParseUint(parts[0], 10, 64)
 	abortTxOnError(err, "Could not parse ID")
 
-	// rest of parsing
+	amount, err := currency.NewFromString(parts[4])
+	abortTxOnError(err, "Could not parse amount in transaction")
 
 	return setBuyTriggerCmd{
 		id:     id,
 		userID: parts[2],
-		// rest of parts
+		stock:  parts[3],
+		amount: amount,
 	}
 }
 

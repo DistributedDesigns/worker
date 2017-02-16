@@ -20,12 +20,10 @@ func parseCancelSetBuyCmd(parts []string) cancelSetBuyCmd {
 	id, err := strconv.ParseUint(parts[0], 10, 64)
 	abortTxOnError(err, "Could not parse ID")
 
-	// rest of parsing
-
 	return cancelSetBuyCmd{
 		id:     id,
 		userID: parts[2],
-		// rest of parts
+		stock:  parts[3],
 	}
 }
 

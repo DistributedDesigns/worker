@@ -19,12 +19,9 @@ func parseCommitBuyCmd(parts []string) commitBuyCmd {
 	id, err := strconv.ParseUint(parts[0], 10, 64)
 	abortTxOnError(err, "Could not parse ID")
 
-	// rest of parsing
-
 	return commitBuyCmd{
 		id:     id,
 		userID: parts[2],
-		// rest of parts
 	}
 }
 

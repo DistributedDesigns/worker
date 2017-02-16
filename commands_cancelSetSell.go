@@ -12,7 +12,7 @@ type cancelSetSellCmd struct {
 	stock  string
 }
 
-func parseCancelSetSellCmd(parts []string) cancelBuyCmd {
+func parseCancelSetSellCmd(parts []string) cancelSetSellCmd {
 	if len(parts) != 4 {
 		abortTx("CANCEL_SET_SELL needs 4 parts")
 	}
@@ -20,12 +20,10 @@ func parseCancelSetSellCmd(parts []string) cancelBuyCmd {
 	id, err := strconv.ParseUint(parts[0], 10, 64)
 	abortTxOnError(err, "Could not parse ID")
 
-	// rest of parsing
-
-	return cancelBuyCmd{
+	return cancelSetSellCmd{
 		id:     id,
 		userID: parts[2],
-		// rest of parts
+		stock:  parts[3],
 	}
 }
 

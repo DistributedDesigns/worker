@@ -22,12 +22,13 @@ func parseAddCmd(parts []string) addCmd {
 	id, err := strconv.ParseUint(parts[0], 10, 64)
 	abortTxOnError(err, "Could not parse ID")
 
-	// rest of parsing
+	amount, err := currency.NewFromString(parts[3])
+	abortTxOnError(err, "Could not parse amount in transaction")
 
 	return addCmd{
 		id:     id,
 		userID: parts[2],
-		// rest of parts
+		amount: amount,
 	}
 }
 

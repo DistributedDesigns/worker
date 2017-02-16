@@ -19,12 +19,9 @@ func parseCancelSellCmd(parts []string) cancelSellCmd {
 	id, err := strconv.ParseUint(parts[0], 10, 64)
 	abortTxOnError(err, "Could not parse ID")
 
-	// rest of parsing
-
 	return cancelSellCmd{
 		id:     id,
 		userID: parts[2],
-		// rest of parts
 	}
 }
 
