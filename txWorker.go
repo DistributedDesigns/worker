@@ -22,7 +22,6 @@ func processTxs(unprocessedTxs <-chan string) {
 	cmd := parseCommand(<-unprocessedTxs)
 	cmd.Execute()
 	go sendToAuditLog(cmd)
-	consoleLog.Notice(" [✔] Finished", cmd.Name())
 }
 
 func abortTx(msg string) {
