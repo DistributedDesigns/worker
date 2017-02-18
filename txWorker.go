@@ -20,8 +20,8 @@ func processTxs(unprocessedTxs <-chan string) {
 	// next transaction is grabbed.
 	defer catchAbortedTx()
 	cmd := parseCommand(<-unprocessedTxs)
-	cmd.Execute()
 	go sendToAuditLog(cmd)
+	cmd.Execute()
 }
 
 func abortTx(msg string) {
