@@ -46,7 +46,7 @@ func (sbt setBuyTriggerCmd) ToAuditEntry() string {
 		<transactionNum>%d</transactionNum>
 		<command>SET_BUY_TRIGGER</command>
 		<username>%s</username>
-		<stockSymbol>%s</stockSymbol>>
+		<stockSymbol>%s</stockSymbol>
 		<funds>%.02f</funds>
 	</userCommand>`,
 		time.Now().UnixNano()/1e6, redisBaseKey, sbt.id, sbt.userID,
