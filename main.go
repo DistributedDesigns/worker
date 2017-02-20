@@ -77,6 +77,9 @@ func main() {
 	// Capped channel of tx pulled out of redis
 	unprocessedTxs := make(chan string, 2)
 
+	// open http connections
+	go httpWatcher()
+
 	// Start concurrent actions
 	go catchQuoteBroadcasts()
 	// watch auto transactions
