@@ -9,3 +9,13 @@ if [ $? -ne 0 ]; then
 else
   echo "✔ Linter passed"
 fi
+
+# Check for files with formatting different from gofmt's
+gofmt -l .
+
+if [ $? -ne 0 ]; then
+  echo "✗ gofmt failed. Branch not pushed to remote."
+  exit 1
+else
+  echo "✔ gofmt passed"
+fi
