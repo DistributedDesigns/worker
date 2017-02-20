@@ -34,7 +34,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 func httpWatcher() {
 	conn = redisPool.Get()
-	port := ":6060"
+	port := fmt.Sprintf(":%d", 44431+*workerNum)
 	fmt.Printf("Started watching on port %s\n", port)
 	http.HandleFunc("/", handler)
 	http.ListenAndServe(port, nil)
