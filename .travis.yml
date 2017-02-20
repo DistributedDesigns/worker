@@ -13,7 +13,7 @@ install:
   - go build .
 
 script:
-  - ./script/pre-push
+  - ./scripts/pre-push
 
 notifications:
   email: false
