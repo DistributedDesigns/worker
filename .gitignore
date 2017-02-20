@@ -1,2 +1,8 @@
 # workfiles
 work/
+debug
+modules.xml
+vcs.xml
+worker.iml
+workspace.xml
+launch.json
