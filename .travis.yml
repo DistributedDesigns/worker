@@ -13,7 +13,7 @@ install:
   - go build .
 
 script:
-  - gometalinter --config=.gometalinterrc ./...
+  - ./githooks/pre-push
 
 notifications:
   email: false
