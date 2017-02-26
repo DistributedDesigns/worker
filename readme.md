@@ -7,6 +7,7 @@ Executes transactions for users. Stores the user account information. It's got a
 ## Installing
 ```sh
 git clone https://github.com/DistributedDesigns/worker.git
+cd worker
 
 .scripts/install
 
