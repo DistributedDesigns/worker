@@ -6,8 +6,6 @@ func fetchNewTx(unprocessedTxs chan<- string) {
 	conn := redisPool.Get()
 	defer conn.Close()
 
-	pendingTxKey := redisBaseKey + "pendingtx"
-
 	for {
 		select {
 		case <-done:

@@ -42,6 +42,7 @@ var (
 	done       = make(chan struct{})
 
 	redisBaseKey string
+	pendingTxKey string
 	redisPool    *redis.Pool
 	rmqConn      *amqp.Connection
 )
@@ -65,7 +66,7 @@ func main() {
 	initConsoleLogging()
 	loadConfig()
 	redisBaseKey = fmt.Sprintf("%s%d:", config.Redis.KeyPrefix, *workerNum)
-
+	pendingTxKey = fmt.Sprintf("%spendingTx", redisBaseKey)
 	// Connect to external services
 	initRMQ()
 	defer rmqConn.Close()
@@ -76,6 +77,9 @@ func main() {
 
 	// Capped channel of tx pulled out of redis
 	unprocessedTxs := make(chan string, 2)
+
+	// open http connections
+	go incomingTxWatcher()
 
 	// Start concurrent actions
 	go catchQuoteBroadcasts()
