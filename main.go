@@ -78,7 +78,7 @@ func main() {
 	unprocessedTxs := make(chan string, 2)
 
 	// open http connections
-	go httpWatcher()
+	go incomingTxWatcher()
 
 	// Start concurrent actions
 	go catchQuoteBroadcasts()

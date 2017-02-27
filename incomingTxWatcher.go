@@ -17,25 +17,26 @@ var conn redis.Conn
 func handler(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
-	var cmd commandStruct
+	cmd := struct{ Command string }{""}
 	err := decoder.Decode(&cmd)
 
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(cmd.Command)
+	failOnError(err, "Decoding Failed")
+
 	//Validate Command
 	//Add it to Redis
-	conn.Do("RPUSH", fmt.Sprintf("worker:%d:pendingtx", *workerNum), cmd.Command)
+	_, err = conn.Do("RPUSH", fmt.Sprintf("worker:%d:pendingtx", *workerNum), cmd.Command)
 
+	failOnError(err, "Failed to push to worker queue")
 	responseText := fmt.Sprintf("Successfully performed %s\n", cmd.Command)
 	fmt.Fprintf(w, responseText, r.URL.Path[1:])
 }
 
-func httpWatcher() {
+func incomingTxWatcher() {
 	conn = redisPool.Get()
-	port := fmt.Sprintf(":%d", 44431+*workerNum)
+
+	port := fmt.Sprintf(":%d", config.Redis.Port+*workerNum)
 	fmt.Printf("Started watching on port %s\n", port)
+	consoleLog.Debugf("Started watching on port %s\n", port)
 	http.HandleFunc("/", handler)
 	http.ListenAndServe(port, nil)
 }
