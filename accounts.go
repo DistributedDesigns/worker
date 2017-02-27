@@ -10,23 +10,23 @@ import (
 	// "github.com/op/go-logging"
 )
 
-// account : State of a particular account
-type account struct {
+// Account : State of a particular Account
+type Account struct {
 	Balance currency.Currency
 }
 
-// accounts : Maps name -> account
-type accounts map[string]*account
+// Accounts : Maps name -> account
+type Accounts map[string]*Account
 
 // AccountStore : A collection of accouunts
 type AccountStore struct {
-	accounts map[string]*account
+	accounts map[string]*Account
 }
 
 // NewAccountStore : A constructor that returns an initialized accountStore
 func NewAccountStore() *AccountStore {
 	var as AccountStore
-	as.accounts = make(accounts)
+	as.accounts = make(Accounts)
 	return &as
 }
 
@@ -37,7 +37,7 @@ func (as AccountStore) HasAccount(name string) bool {
 }
 
 // GetAccount ; Grab an account if it exists for the user
-func (as AccountStore) GetAccount(name string) *account {
+func (as AccountStore) GetAccount(name string) *Account {
 	account, ok := as.accounts[name]
 	if !ok {
 		return nil
@@ -53,19 +53,19 @@ func (as AccountStore) CreateAccount(name string) error {
 	}
 
 	// Add account with initial values
-	as.accounts[name] = &account{}
+	as.accounts[name] = &Account{}
 
 	return nil
 }
 
 // AddFunds : Increases the balance of the account
-func (ac *account) AddFunds(amount currency.Currency) {
+func (ac *Account) AddFunds(amount currency.Currency) {
 	// Only allow > $0.00 to be added
 	ac.Balance.Add(amount)
 }
 
 // RemoveFunds : Decrease balance of the account
-func (ac *account) RemoveFunds(amount currency.Currency) error {
+func (ac *Account) RemoveFunds(amount currency.Currency) error {
 	err := ac.Balance.Sub(amount)
 	if err != nil {
 		return errors.New("Insufficient Funds")
