@@ -38,6 +38,8 @@ var (
 		Short('a').
 		Bool()
 
+	accountStore = NewAccountStore()
+
 	consoleLog = logging.MustGetLogger("console")
 	done       = make(chan struct{})
 

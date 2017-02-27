@@ -18,26 +18,26 @@ type account struct {
 // accounts : Maps name -> account
 type accounts map[string]*account
 
-// accountStore : A collection of accouunts
-type accountStore struct {
+// AccountStore : A collection of accouunts
+type AccountStore struct {
 	accounts map[string]*account
 }
 
 // NewAccountStore : A constructor that returns an initialized accountStore
-func NewAccountStore() *accountStore {
-	var as accountStore
+func NewAccountStore() *AccountStore {
+	var as AccountStore
 	as.accounts = make(accounts)
 	return &as
 }
 
 // HasAccount : Checks if there's an existing account for the user
-func (as accountStore) HasAccount(name string) bool {
+func (as AccountStore) HasAccount(name string) bool {
 	_, ok := as.accounts[name]
 	return ok
 }
 
 // GetAccount ; Grab an account if it exists for the user
-func (as accountStore) GetAccount(name string) *account {
+func (as AccountStore) GetAccount(name string) *account {
 	account, ok := as.accounts[name]
 	if !ok {
 		return nil
@@ -46,7 +46,7 @@ func (as accountStore) GetAccount(name string) *account {
 }
 
 // CreateAccount : Initialize a new account. Fail if one already exists
-func (as accountStore) CreateAccount(name string) error {
+func (as AccountStore) CreateAccount(name string) error {
 	// Check for pre-existing accounts
 	if as.HasAccount(name) {
 		return errors.New("Account already exists")
