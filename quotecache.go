@@ -167,12 +167,20 @@ func watchForQuoteUpdate(qr types.QuoteRequest, freshQuotes chan<- types.Quote, 
 	)
 	failOnError(err, "Failed to declare a queue")
 
+	var freshnessFilter string
+	if qr.AllowCache {
+		// Catch fresh and cached
+		freshnessFilter = ".*"
+	} else {
+		freshnessFilter = ".fresh"
+	}
+
 	err = ch.QueueBind(
-		q.Name,            // name
-		qr.Stock+".fresh", // routing key
-		quoteBroadcastEx,  // exchange
-		false,             // no-wait
-		nil,               // args
+		q.Name, // name
+		qr.Stock+freshnessFilter, // routing key
+		quoteBroadcastEx,         // exchange
+		false,                    // no-wait
+		nil,                      // args
 	)
 	failOnError(err, "Failed to bind a queue")
 
