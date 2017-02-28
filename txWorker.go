@@ -83,6 +83,7 @@ func sendCmdToAudit() {
 			header := amqp.Table{
 				"name":      cmd.Name(),
 				"serviceID": redisBaseKey,
+				"userID":    cmd.GetUserID(),
 			}
 
 			err := logChannel.Publish(

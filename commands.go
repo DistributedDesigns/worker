@@ -8,6 +8,7 @@ import (
 type command interface {
 	Execute()
 	Name() string
+	GetUserID() string
 	ToAuditEntry() string
 }
 

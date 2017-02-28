@@ -38,6 +38,10 @@ func (b buyCmd) Name() string {
 	return fmt.Sprintf("[%d] BUY", b.id)
 }
 
+func (b buyCmd) GetUserID() string {
+	return b.userID
+}
+
 func (b buyCmd) ToAuditEntry() string {
 	return fmt.Sprintf(`
 	<userCommand>

@@ -36,6 +36,10 @@ func (a addCmd) Name() string {
 	return fmt.Sprintf("[%d] ADD", a.id)
 }
 
+func (a addCmd) GetUserID() string {
+	return a.userID
+}
+
 func (a addCmd) ToAuditEntry() string {
 	return fmt.Sprintf(`
 	<userCommand>

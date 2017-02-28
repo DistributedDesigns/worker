@@ -29,6 +29,10 @@ func (ds displaySummaryCmd) Name() string {
 	return fmt.Sprintf("[%d] DISPLAY_SUMMARY", ds.id)
 }
 
+func (ds displaySummaryCmd) GetUserID() string {
+	return ds.userID
+}
+
 func (ds displaySummaryCmd) ToAuditEntry() string {
 	return fmt.Sprintf(`
 	<userCommand>

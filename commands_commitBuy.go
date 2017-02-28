@@ -29,6 +29,10 @@ func (cb commitBuyCmd) Name() string {
 	return fmt.Sprintf("[%d] COMMIT_BUY", cb.id)
 }
 
+func (cb commitBuyCmd) GetUserID() string {
+	return cb.userID
+}
+
 func (cb commitBuyCmd) ToAuditEntry() string {
 	return fmt.Sprintf(`
 	<userCommand>

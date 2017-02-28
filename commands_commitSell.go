@@ -29,6 +29,10 @@ func (cs commitSellCmd) Name() string {
 	return fmt.Sprintf("[%d] COMMIT_SELL", cs.id)
 }
 
+func (cs commitSellCmd) GetUserID() string {
+	return cs.userID
+}
+
 func (cs commitSellCmd) ToAuditEntry() string {
 	return fmt.Sprintf(`
 	<userCommand>
