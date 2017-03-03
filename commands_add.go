@@ -9,7 +9,7 @@ import (
 )
 
 type addCmd struct {
-	txID   uint64
+	id     uint64
 	userID string
 	amount currency.Currency
 }
@@ -26,14 +26,14 @@ func parseAddCmd(parts []string) addCmd {
 	abortTxOnError(err, "Could not parse amount in transaction")
 
 	return addCmd{
-		txID:   txID,
+		id:     txID,
 		userID: parts[2],
 		amount: amount,
 	}
 }
 
 func (a addCmd) Name() string {
-	return fmt.Sprintf("[%d] ADD", a.txID)
+	return fmt.Sprintf("[%d] ADD", a.id)
 }
 
 func (a addCmd) ToAuditEntry() string {
@@ -46,31 +46,31 @@ func (a addCmd) ToAuditEntry() string {
 		<username>%s</username>
 		<funds>%.02f</funds>
 	</userCommand>`,
-		time.Now().UnixNano()/1e6, redisBaseKey, a.txID, a.userID, a.amount.ToFloat(),
+		time.Now().UnixNano()/1e6, redisBaseKey, a.id, a.userID, a.amount.ToFloat(),
 	)
 }
 
 func (a addCmd) Execute() {
 	// Create an account if one does not exist
-	if !accountStore.HasAccount(a.userID) {
-		consoleLog.Noticef("Creating account for %s", a.userID)
-		if err := accountStore.CreateAccount(a.userID); err != nil {
-			consoleLog.Error(err.Error())
-			abortTx("Account creation failed")
-		}
+
+	if _, accountExists := accountMap[a.userID]; !accountExists {
+		consoleLog.Infof("Creating account for %s", a.userID)
+		accountMap[a.userID] = &Account{}
 	}
 
-	// Add the amounts
-	consoleLog.Infof("Adding %s to %s", a.amount, a.userID)
-	userAccount := accountStore.GetAccount(a.userID)
-	if userAccount == nil {
-		consoleLog.Errorf("Internal account creation error for %s", a.userID)
+	// userAccount is a POINTER, remember to derefernce it with every use.
+	// Cannot copy *userAccount since it contains a mutex
+	userAccount, found := accountMap[a.userID]
+	if !found {
+		consoleLog.Fatalf("Internal account creation error for %s", a.userID)
 		abortTx("Internal account creation error")
 	}
 
-	consoleLog.Debugf("Old balance for %s is %s", a.userID, userAccount.Balance)
+	consoleLog.Infof("Adding %s to %s", a.amount, a.userID)
+	consoleLog.Debugf("Old balance for %s is %s", a.userID, (*userAccount).Balance)
 
-	userAccount.AddFunds(a.amount)
+	(*userAccount).AddFunds(a.amount)
 
-	consoleLog.Infof("New balance for %s is %s", a.userID, userAccount.Balance)
+	consoleLog.Debugf("New balance for %s is %s", a.userID, (*userAccount).Balance)
+	consoleLog.Notice(" [✔] Finished", a.Name())
 }
