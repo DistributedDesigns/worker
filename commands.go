@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"strings"
-
-	"github.com/streadway/amqp"
 )
 
 type command interface {
@@ -67,33 +65,4 @@ func parseCommand(s string) command {
 	}
 
 	return parsedCommand
-}
-
-func sendToAuditLog(cmd command) {
-	if *noAudit {
-		return
-	}
-
-	ch, err := rmqConn.Channel()
-	failOnError(err, "Failed to open a channel")
-	defer ch.Close()
-
-	header := amqp.Table{
-		"name":      cmd.Name(),
-		"serviceID": redisBaseKey,
-	}
-
-	err = ch.Publish(
-		"",          // exchange
-		auditEventQ, // routing key
-		false,       // mandatory
-		false,       // immediate
-		amqp.Publishing{
-			Headers:     header,
-			ContentType: "text/plain",
-			Body:        []byte(cmd.ToAuditEntry()),
-		})
-	failOnError(err, "Failed to publish a message")
-
-	consoleLog.Debug("Sent audit log")
 }
