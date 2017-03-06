@@ -65,8 +65,8 @@ func main() {
 	kingpin.Parse()
 	initConsoleLogging()
 	loadConfig()
-	redisBaseKey = fmt.Sprintf("%s%d:", config.Redis.KeyPrefix, *workerNum)
-	pendingTxKey = fmt.Sprintf("%spendingTx", redisBaseKey)
+	redisBaseKey = fmt.Sprintf("%s%d", config.Redis.KeyPrefix, *workerNum)
+	pendingTxKey = fmt.Sprintf("%s:pendingTx", redisBaseKey)
 	// Connect to external services
 	initRMQ()
 	defer rmqConn.Close()
