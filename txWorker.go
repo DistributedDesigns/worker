@@ -37,8 +37,13 @@ func processTxs(unprocessedTxs <-chan string) {
 	// Control returns to txWorker() where the select{} repeats and the
 	// next transaction is grabbed.
 	defer catchAbortedTx()
+
 	cmd := parseCommand(<-unprocessedTxs)
-	loggableCmds <- cmd
+
+	if !*noAudit {
+		loggableCmds <- cmd
+	}
+
 	cmd.Execute()
 }
 
