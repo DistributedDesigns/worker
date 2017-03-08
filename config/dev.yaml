@@ -10,7 +10,7 @@ redis:
   max idle connections: 5
   max active connections: 0 # 0 = unlimited
   idle timeout: 30 # seconds
-  key prefix: "worker:"
+  key prefix: "worker"
 
 # This defines the retention policy for quotes in the cache.
 # Each quote is valid for 60s from the timestamp returned from the

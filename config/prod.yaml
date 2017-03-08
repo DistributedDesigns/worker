@@ -10,7 +10,7 @@ redis:
   max idle connections: 5
   max active connections: 0
   idle timeout: 30
-  key prefix: "worker:"
+  key prefix: "worker"
 
 quote policy:
   base ttl: 59

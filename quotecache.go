@@ -46,7 +46,7 @@ func catchQuoteBroadcasts() {
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
-		redisBaseKey+"updater", // name
+		redisBaseKey+":updater", // name
 		true,  // durable
 		true,  // delete when unused
 		false, // exclusive
@@ -115,7 +115,7 @@ func cacheQuote(q types.Quote) {
 }
 
 func getQuoteKey(stock string) string {
-	return redisBaseKey + "quotes:" + stock
+	return redisBaseKey + ":quotes:" + stock
 }
 
 // getQuote checks local redis for a quote
