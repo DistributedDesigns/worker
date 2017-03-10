@@ -52,25 +52,14 @@ func (a addCmd) ToAuditEntry() string {
 
 func (a addCmd) Execute() {
 	// Create an account if one does not exist
-
 	if _, accountExists := accountMap[a.userID]; !accountExists {
 		consoleLog.Infof("Creating account for %s", a.userID)
-		accountMap[a.userID] = &Account{}
+		accountMap[a.userID] = &account{}
 	}
 
-	// userAccount is a POINTER, remember to derefernce it with every use.
-	// Cannot copy *userAccount since it contains a mutex
-	userAccount, found := accountMap[a.userID]
-	if !found {
-		consoleLog.Fatalf("Internal account creation error for %s", a.userID)
-		abortTx("Internal account creation error")
-	}
+	userAccount, _ := accountMap[a.userID]
 
 	consoleLog.Infof("Adding %s to %s", a.amount, a.userID)
-	consoleLog.Debugf("Old balance for %s is %s", a.userID, (*userAccount).Balance)
-
-	(*userAccount).AddFunds(a.amount)
-
-	consoleLog.Debugf("New balance for %s is %s", a.userID, (*userAccount).Balance)
+	userAccount.AddFunds(a.amount)
 	consoleLog.Notice(" [✔] Finished", a.Name())
 }
