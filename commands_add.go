@@ -19,14 +19,14 @@ func parseAddCmd(parts []string) addCmd {
 		abortTx("ADD needs 4 parts")
 	}
 
-	id, err := strconv.ParseUint(parts[0], 10, 64)
+	txID, err := strconv.ParseUint(parts[0], 10, 64)
 	abortTxOnError(err, "Could not parse ID")
 
 	amount, err := currency.NewFromString(parts[3])
 	abortTxOnError(err, "Could not parse amount in transaction")
 
 	return addCmd{
-		id:     id,
+		id:     txID,
 		userID: parts[2],
 		amount: amount,
 	}
@@ -51,5 +51,15 @@ func (a addCmd) ToAuditEntry() string {
 }
 
 func (a addCmd) Execute() {
-	consoleLog.Warning("Not implemented: ADD")
+	// Create an account if one does not exist
+	if _, accountExists := accountMap[a.userID]; !accountExists {
+		consoleLog.Infof("Creating account for %s", a.userID)
+		accountMap[a.userID] = &account{}
+	}
+
+	userAccount, _ := accountMap[a.userID]
+
+	consoleLog.Infof("Adding %s to %s", a.amount, a.userID)
+	userAccount.AddFunds(a.amount)
+	consoleLog.Notice(" [✔] Finished", a.Name())
 }
