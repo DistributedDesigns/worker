@@ -33,6 +33,10 @@ func (q quoteCmd) Name() string {
 	return fmt.Sprintf("[%d] QUOTE", q.id)
 }
 
+func (q quoteCmd) GetUserID() string {
+	return q.userID
+}
+
 func (q quoteCmd) ToAuditEntry() string {
 	return fmt.Sprintf(`
 	<userCommand>

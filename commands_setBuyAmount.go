@@ -38,6 +38,10 @@ func (sba setBuyAmountCmd) Name() string {
 	return fmt.Sprintf("[%d] SET_BUY_AMOUNT", sba.id)
 }
 
+func (sba setBuyAmountCmd) GetUserID() string {
+	return sba.userID
+}
+
 func (sba setBuyAmountCmd) ToAuditEntry() string {
 	return fmt.Sprintf(`
 	<userCommand>

@@ -38,6 +38,10 @@ func (sbt setBuyTriggerCmd) Name() string {
 	return fmt.Sprintf("[%d] SET_BUY_TRIGGER", sbt.id)
 }
 
+func (sbt setBuyTriggerCmd) GetUserID() string {
+	return sbt.userID
+}
+
 func (sbt setBuyTriggerCmd) ToAuditEntry() string {
 	return fmt.Sprintf(`
 	<userCommand>

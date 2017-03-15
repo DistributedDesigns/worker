@@ -29,6 +29,10 @@ func (cs cancelSellCmd) Name() string {
 	return fmt.Sprintf("[%d] CANCEL_SELL", cs.id)
 }
 
+func (cs cancelSellCmd) GetUserID() string {
+	return cs.userID
+}
+
 func (cs cancelSellCmd) ToAuditEntry() string {
 	return fmt.Sprintf(`
 	<userCommand>

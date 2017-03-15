@@ -38,6 +38,10 @@ func (ssa setSellAmountCmd) Name() string {
 	return fmt.Sprintf("[%d] SET_SELL_AMOUNT", ssa.id)
 }
 
+func (ssa setSellAmountCmd) GetUserID() string {
+	return ssa.userID
+}
+
 func (ssa setSellAmountCmd) ToAuditEntry() string {
 	return fmt.Sprintf(`
 	<userCommand>

@@ -31,6 +31,10 @@ func (csb cancelSetBuyCmd) Name() string {
 	return fmt.Sprintf("[%d] CANCEL_SET_BUY", csb.id)
 }
 
+func (csb cancelSetBuyCmd) GetUserID() string {
+	return csb.userID
+}
+
 func (csb cancelSetBuyCmd) ToAuditEntry() string {
 	return fmt.Sprintf(`
 	<userCommand>

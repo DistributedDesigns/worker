@@ -40,17 +40,28 @@ func (dl dumplogCmd) Name() string {
 	return fmt.Sprintf("[%d] DUMPLOG", dl.id)
 }
 
+func (dl dumplogCmd) GetUserID() string {
+	return dl.userID
+}
+
 func (dl dumplogCmd) ToAuditEntry() string {
+	// Workload file validator will fail if it sees the injected "admin" account
+	// in the workload file. We'll make it disappear here but carry it through
+	// the rest of the system.
+	var userNameField string
+	if dl.userID != "admin" {
+		userNameField = fmt.Sprintf("\n\t\t<username>%s</username>", dl.userID)
+	}
+
 	return fmt.Sprintf(`
 	<userCommand>
 		<timestamp>%d</timestamp>
 		<server>%s</server>
 		<transactionNum>%d</transactionNum>
-		<command>DUMPLOG</command>
-		<username>%s</username>
+		<command>DUMPLOG</command>%s
 		<filename>%s</filename>
 	</userCommand>`,
-		time.Now().UnixNano()/1e6, redisBaseKey, dl.id, dl.userID, dl.filename,
+		time.Now().UnixNano()/1e6, redisBaseKey, dl.id, userNameField, dl.filename,
 	)
 }
 

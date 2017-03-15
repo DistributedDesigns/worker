@@ -38,6 +38,10 @@ func (sst setSellTriggerCmd) Name() string {
 	return fmt.Sprintf("[%d] SET_SELL_TRIGGER", sst.id)
 }
 
+func (sst setSellTriggerCmd) GetUserID() string {
+	return sst.userID
+}
+
 func (sst setSellTriggerCmd) ToAuditEntry() string {
 	return fmt.Sprintf(`
 	<userCommand>
