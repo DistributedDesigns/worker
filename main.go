@@ -38,7 +38,7 @@ var (
 		Short('a').
 		Bool()
 
-	accountMap = make(map[string]*account)
+	accountStore = make(map[string]*account)
 
 	consoleLog = logging.MustGetLogger("console")
 	done       = make(chan struct{})

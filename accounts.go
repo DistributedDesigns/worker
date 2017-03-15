@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"sync"
 
 	"github.com/distributeddesigns/currency"
@@ -27,11 +26,13 @@ func (ac *account) AddFunds(amount currency.Currency) {
 
 // RemoveFunds : Decrease balance of the account
 func (ac *account) RemoveFunds(amount currency.Currency) error {
+	consoleLog.Debugf("Old balance for %s is %s", ac.userID, ac.balance)
+
 	ac.Lock()
 	err := ac.balance.Sub(amount)
 	ac.Unlock()
-	if err != nil {
-		return errors.New("Insufficient Funds")
-	}
-	return nil
+
+	consoleLog.Debugf("New balance for %s is %s", ac.userID, ac.balance)
+
+	return err
 }

@@ -56,14 +56,15 @@ func (a addCmd) ToAuditEntry() string {
 
 func (a addCmd) Execute() {
 	// Create an account if one does not exist
-	if _, accountExists := accountMap[a.userID]; !accountExists {
+	if _, accountExists := accountStore[a.userID]; !accountExists {
 		consoleLog.Infof("Creating account for %s", a.userID)
-		accountMap[a.userID] = &account{}
+		accountStore[a.userID] = &account{userID: a.userID}
 	}
 
-	userAccount, _ := accountMap[a.userID]
+	userAccount := accountStore[a.userID]
 
 	consoleLog.Infof("Adding %s to %s", a.amount, a.userID)
 	userAccount.AddFunds(a.amount)
+
 	consoleLog.Notice(" [✔] Finished", a.Name())
 }
