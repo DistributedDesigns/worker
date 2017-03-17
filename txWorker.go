@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/streadway/amqp"
 )
 
@@ -85,25 +88,8 @@ func sendCmdToAudit() {
 			cleanUpCmdLog()
 			return
 		case cmd := <-loggableCmds:
-			header := amqp.Table{
-				"name":      cmd.Name(),
-				"serviceID": redisBaseKey,
-				"userID":    cmd.GetUserID(),
-			}
-
-			err := logChannel.Publish(
-				"",          // exchange
-				auditEventQ, // routing key
-				false,       // mandatory
-				false,       // immediate
-				amqp.Publishing{
-					Headers:     header,
-					ContentType: "text/plain",
-					Body:        []byte(cmd.ToAuditEntry()),
-				})
-			failOnError(err, "Failed to publish a message")
-
-			consoleLog.Debug("Sent to audit:", cmd.Name())
+			// Catch stderr with redirect to write to local file
+			fmt.Fprint(os.Stderr, cmd.ToAuditEntry())
 		}
 	}
 }
