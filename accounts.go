@@ -11,6 +11,8 @@ type account struct {
 	userID  string
 	balance currency.Currency
 	sync.Mutex
+	pendingBuys buyStack
+	portfolio   map[string]uint
 }
 
 // AddFunds : Increases the balance of the account

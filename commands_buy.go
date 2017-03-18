@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/distributeddesigns/currency"
+	types "github.com/distributeddesigns/shared_types"
 )
 
 type buyCmd struct {
@@ -58,5 +59,43 @@ func (b buyCmd) ToAuditEntry() string {
 }
 
 func (b buyCmd) Execute() {
-	consoleLog.Warning("Not implemented: BUY")
+
+	if _, accountExists := accountStore[b.userID]; !accountExists {
+		consoleLog.Errorf("No account for %s exists", b.userID)
+		return
+	}
+
+	userAccount := accountStore[b.userID]
+
+	if userAccount.balance.ToFloat() < b.amount.ToFloat() {
+		consoleLog.Errorf("User %s does not have enough available funds for this purchase", b.userID)
+		return
+	}
+
+	qr := types.QuoteRequest{
+		Stock:      b.stock,
+		UserID:     b.userID,
+		AllowCache: true,
+		ID:         b.id,
+	}
+
+	var theQuote types.Quote
+	theQuote = getQuote(qr)
+	numStocks, _ := theQuote.Price.FitsInto(b.amount)
+	spent := theQuote.Price
+	spent.Mul(float64(numStocks))
+
+	consoleLog.Debugf("Removing %s from %s", spent, b.userID)
+	userAccount.RemoveFunds(spent)
+
+	bi := buyItem{
+		amount:         spent,
+		numStocks:      numStocks,
+		price:          theQuote.Price,
+		stock:          b.stock,
+		quoteTimeStamp: theQuote.Timestamp,
+	}
+	userAccount.pendingBuys.push(bi)
+
+	consoleLog.Notice(" [✔] Finished", b.Name())
 }
