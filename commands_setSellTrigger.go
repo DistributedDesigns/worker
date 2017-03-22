@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/distributeddesigns/currency"
+	types "github.com/distributeddesigns/shared_types"
 )
 
 type setSellTriggerCmd struct {
@@ -38,12 +39,8 @@ func (sst setSellTriggerCmd) Name() string {
 	return fmt.Sprintf("[%d] SET_SELL_TRIGGER", sst.id)
 }
 
-func (sst setSellTriggerCmd) GetUserID() string {
-	return sst.userID
-}
-
-func (sst setSellTriggerCmd) ToAuditEntry() string {
-	return fmt.Sprintf(`
+func (sst setSellTriggerCmd) ToAuditEvent() types.AuditEvent {
+	xmlElement := fmt.Sprintf(`
 	<userCommand>
 		<timestamp>%d</timestamp>
 		<server>%s</server>
@@ -56,6 +53,13 @@ func (sst setSellTriggerCmd) ToAuditEntry() string {
 		time.Now().UnixNano()/1e6, redisBaseKey, sst.id, sst.userID,
 		sst.stock, sst.amount.ToFloat(),
 	)
+
+	return types.AuditEvent{
+		UserID:    sst.userID,
+		ID:        sst.id,
+		EventType: "command",
+		Content:   xmlElement,
+	}
 }
 
 func (sst setSellTriggerCmd) Execute() {

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/distributeddesigns/currency"
+	types "github.com/distributeddesigns/shared_types"
 )
 
 type setBuyAmountCmd struct {
@@ -38,12 +39,8 @@ func (sba setBuyAmountCmd) Name() string {
 	return fmt.Sprintf("[%d] SET_BUY_AMOUNT", sba.id)
 }
 
-func (sba setBuyAmountCmd) GetUserID() string {
-	return sba.userID
-}
-
-func (sba setBuyAmountCmd) ToAuditEntry() string {
-	return fmt.Sprintf(`
+func (sba setBuyAmountCmd) ToAuditEvent() types.AuditEvent {
+	xmlElement := fmt.Sprintf(`
 	<userCommand>
 		<timestamp>%d</timestamp>
 		<server>%s</server>
@@ -56,6 +53,13 @@ func (sba setBuyAmountCmd) ToAuditEntry() string {
 		time.Now().UnixNano()/1e6, redisBaseKey, sba.id, sba.userID,
 		sba.stock, sba.amount.ToFloat(),
 	)
+
+	return types.AuditEvent{
+		UserID:    sba.userID,
+		ID:        sba.id,
+		EventType: "command",
+		Content:   xmlElement,
+	}
 }
 
 func (sba setBuyAmountCmd) Execute() {

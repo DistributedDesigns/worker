@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+
+	types "github.com/distributeddesigns/shared_types"
 )
 
 type commitBuyCmd struct {
@@ -29,12 +31,8 @@ func (cb commitBuyCmd) Name() string {
 	return fmt.Sprintf("[%d] COMMIT_BUY", cb.id)
 }
 
-func (cb commitBuyCmd) GetUserID() string {
-	return cb.userID
-}
-
-func (cb commitBuyCmd) ToAuditEntry() string {
-	return fmt.Sprintf(`
+func (cb commitBuyCmd) ToAuditEvent() types.AuditEvent {
+	xmlElement := fmt.Sprintf(`
 	<userCommand>
 		<timestamp>%d</timestamp>
 		<server>%s</server>
@@ -44,6 +42,13 @@ func (cb commitBuyCmd) ToAuditEntry() string {
 	</userCommand>`,
 		time.Now().UnixNano()/1e6, redisBaseKey, cb.id, cb.userID,
 	)
+
+	return types.AuditEvent{
+		UserID:    cb.userID,
+		ID:        cb.id,
+		EventType: "command",
+		Content:   xmlElement,
+	}
 }
 
 func (cb commitBuyCmd) Execute() {

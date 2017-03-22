@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+
+	types "github.com/distributeddesigns/shared_types"
 )
 
 type dumplogCmd struct {
@@ -40,11 +42,7 @@ func (dl dumplogCmd) Name() string {
 	return fmt.Sprintf("[%d] DUMPLOG", dl.id)
 }
 
-func (dl dumplogCmd) GetUserID() string {
-	return dl.userID
-}
-
-func (dl dumplogCmd) ToAuditEntry() string {
+func (dl dumplogCmd) ToAuditEvent() types.AuditEvent {
 	// Workload file validator will fail if it sees the injected "admin" account
 	// in the workload file. We'll make it disappear here but carry it through
 	// the rest of the system.
@@ -53,7 +51,7 @@ func (dl dumplogCmd) ToAuditEntry() string {
 		userNameField = fmt.Sprintf("\n\t\t<username>%s</username>", dl.userID)
 	}
 
-	return fmt.Sprintf(`
+	xmlElement := fmt.Sprintf(`
 	<userCommand>
 		<timestamp>%d</timestamp>
 		<server>%s</server>
@@ -63,6 +61,13 @@ func (dl dumplogCmd) ToAuditEntry() string {
 	</userCommand>`,
 		time.Now().UnixNano()/1e6, redisBaseKey, dl.id, userNameField, dl.filename,
 	)
+
+	return types.AuditEvent{
+		UserID:    dl.userID,
+		ID:        dl.id,
+		EventType: "command",
+		Content:   xmlElement,
+	}
 }
 
 func (dl dumplogCmd) Execute() {
