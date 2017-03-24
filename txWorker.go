@@ -1,6 +1,10 @@
 package main
 
 import (
+	"fmt"
+	"os"
+	"time"
+
 	"github.com/streadway/amqp"
 )
 
@@ -39,6 +43,10 @@ func processTxs(unprocessedTxs <-chan string) {
 	defer catchAbortedTx()
 
 	cmd := parseCommand(<-unprocessedTxs)
+
+	// Log the time the TX starts to measure TPS
+	// Catch with redirect: ... 2> logs.txt
+	fmt.Fprintf(os.Stderr, "%d\n", time.Now().Unix())
 
 	if !*noAudit {
 		loggableCmds <- cmd
