@@ -22,6 +22,10 @@ func (s buyStack) isEmpty() bool {
 	return len(s) == 0
 }
 
+func (bItem buyItem) isExpired() bool {
+	return bItem.quoteTimeStamp.Before(time.Now().Add(time.Second * -60))
+}
+
 func (s *buyStack) push(element buyItem) {
 	(*s) = append(*s, element)
 }
@@ -42,4 +46,22 @@ func (s buyStack) peek() (buyItem, error) {
 		return val, errors.New("Empty Stack")
 	}
 	return s[len(s)-1], nil
+}
+
+func (s *buyStack) dequeue() (buyItem, error) {
+	var val buyItem
+	if (*s).isEmpty() == true {
+		return val, errors.New("Empty Stack")
+	}
+	val = (*s)[0]
+	*s = (*s)[1:]
+	return val, nil
+}
+
+func (s buyStack) headPeek() (buyItem, error) {
+	var val buyItem
+	if s.isEmpty() == true {
+		return val, errors.New("Empty Stack")
+	}
+	return s[0], nil
 }

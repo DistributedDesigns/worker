@@ -59,7 +59,7 @@ func (b buyCmd) ToAuditEntry() string {
 }
 
 func (b buyCmd) Execute() {
-
+	consoleLog.Debug("Starting Buy")
 	if _, accountExists := accountStore[b.userID]; !accountExists {
 		consoleLog.Errorf("No account for %s exists", b.userID)
 		return
@@ -84,18 +84,24 @@ func (b buyCmd) Execute() {
 	numStocks, _ := theQuote.Price.FitsInto(b.amount)
 	spent := theQuote.Price
 	spent.Mul(float64(numStocks))
+	if numStocks > 0 {
+		consoleLog.Infof("Queuing buy %s of %s for %s", spent, b.stock, b.userID)
+		consoleLog.Debugf("Removing %s from %s", spent, b.userID)
+		userAccount.RemoveFunds(spent)
 
-	consoleLog.Debugf("Removing %s from %s", spent, b.userID)
-	userAccount.RemoveFunds(spent)
-
-	bi := buyItem{
-		amount:         spent,
-		numStocks:      numStocks,
-		price:          theQuote.Price,
-		stock:          b.stock,
-		quoteTimeStamp: theQuote.Timestamp,
+		bi := buyItem{
+			amount:         spent,
+			numStocks:      numStocks,
+			price:          theQuote.Price,
+			stock:          b.stock,
+			quoteTimeStamp: theQuote.Timestamp,
+		}
+		userAccount.Lock()
+		userAccount.pendingBuys.push(bi)
+		userAccount.Unlock()
+	} else {
+		consoleLog.Debugf("User %s, insufficient funds for single stock of %s", b.userID, b.stock)
 	}
-	userAccount.pendingBuys.push(bi)
 
 	consoleLog.Notice(" [✔] Finished", b.Name())
 }

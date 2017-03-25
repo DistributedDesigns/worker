@@ -89,6 +89,9 @@ func main() {
 	go fetchNewTx(unprocessedTxs)
 	go txWorker(unprocessedTxs)
 
+	// Start Buy/Sell cleanups
+	go cleanBuyStacks()
+
 	// halt until channel is closed
 	<-done
 }

@@ -48,16 +48,20 @@ func (cb commitBuyCmd) ToAuditEntry() string {
 
 func (cb commitBuyCmd) Execute() {
 	userAccount := accountStore[cb.userID]
+	userAccount.Lock()
 	bItem, err := userAccount.pendingBuys.pop()
+	userAccount.Unlock()
 	if err != nil {
-		consoleLog.Errorf("Cannot confirm buy, no pending buys for %s", cb.userID)
+		consoleLog.Debugf("Cannot confirm buy, no pending buys for %s", cb.userID)
 		return
 	}
 
-	if bItem.quoteTimeStamp.Before(time.Now().Add(time.Second * -60)) {
-		consoleLog.Noticef("Stock price has expired, unable to confirm")
+	if bItem.isExpired() {
+		consoleLog.Noticef("Stock price has expired, unable to confirm; refunding account")
+		userAccount.AddFunds(bItem.amount)
 		return
 	}
 	consoleLog.Debugf("%s purchased %s of %s stock, adding to portfolio", cb.userID, bItem.amount, bItem.stock)
-	userAccount.portfolio[bItem.stock] += bItem.numStocks
+	userAccount.stockPortfolio[bItem.stock] += bItem.numStocks
+	consoleLog.Notice(" [✔] Finished", cb.Name())
 }
