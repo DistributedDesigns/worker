@@ -1,12 +1,19 @@
 package main
 
 import (
+	"fmt"
+	"os"
+	"strings"
+	"time"
+
 	"github.com/streadway/amqp"
 )
 
 var (
 	loggableCmds = make(chan command)
 	logChannel   *amqp.Channel
+	cmdStartTime time.Time
+	elapsedTime  int64 // preallocate space
 )
 
 func txWorker(unprocessedTxs <-chan string) {
@@ -38,13 +45,22 @@ func processTxs(unprocessedTxs <-chan string) {
 	// next transaction is grabbed.
 	defer catchAbortedTx()
 
-	cmd := parseCommand(<-unprocessedTxs)
+	tx := <-unprocessedTxs
+	cmdStartTime = time.Now()
+	cmd := parseCommand(tx)
 
 	if !*noAudit {
 		loggableCmds <- cmd
 	}
 
 	cmd.Execute()
+
+	// Only log runtime if command ran to completion
+	elapsedTime = time.Since(cmdStartTime).Nanoseconds()
+
+	// "[123] BUY" -> "BUY"
+	cmdType := strings.Split(cmd.Name(), " ")[1]
+	fmt.Fprintf(os.Stderr, "%s,%d\n", cmdType, elapsedTime)
 }
 
 func abortTx(msg string) {
