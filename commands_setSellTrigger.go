@@ -67,7 +67,7 @@ func (sst setSellTriggerCmd) Execute() {
 	autoTxKey := types.AutoTxKey{
 		Stock:  sst.stock,
 		UserID: sst.userID,
-		Action: "Buy",
+		Action: "Sell",
 	}
 	autoTx, found := workATXStore[autoTxKey]
 	if !found {
