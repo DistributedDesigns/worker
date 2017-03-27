@@ -8,10 +8,12 @@ import (
 	"strings"
 	"time"
 
+	types "github.com/distributeddesigns/shared_types"
 	"github.com/garyburd/redigo/redis"
 	logging "github.com/op/go-logging"
 	"github.com/streadway/amqp"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
+
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -39,6 +41,7 @@ var (
 		Bool()
 
 	accountStore = make(map[string]*account)
+	workATXStore = make(map[types.AutoTxKey]types.AutoTxInit)
 
 	consoleLog = logging.MustGetLogger("console")
 	done       = make(chan struct{})

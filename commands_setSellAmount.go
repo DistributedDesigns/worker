@@ -63,5 +63,26 @@ func (ssa setSellAmountCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (ssa setSellAmountCmd) Execute() {
-	consoleLog.Warning("Not implemented: SET_SELL_AMOUNT")
+	autoTxKey := types.AutoTxKey{
+		Stock:  ssa.stock,
+		UserID: ssa.userID,
+		Action: "Sell",
+	}
+	_, found := workATXStore[autoTxKey]
+	if found {
+		// autoTx already exists, we'll need to cancel it.
+		// TODO
+
+	}
+	noTrigger, err := currency.NewFromFloat(0)
+	failOnError(err, "Failed to set zero currency")
+	workATXStore[autoTxKey] = types.AutoTxInit{
+		Action:   "Buy",
+		Amount:   ssa.amount,
+		Trigger:  noTrigger,
+		Stock:    ssa.stock,
+		UserID:   ssa.userID,
+		WorkerID: *workerNum,
+	}
+	// consoleLog.Warning("Not implemented: SET_SELL_AMOUNT")
 }

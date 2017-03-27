@@ -63,5 +63,20 @@ func (sst setSellTriggerCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (sst setSellTriggerCmd) Execute() {
-	consoleLog.Warning("Not implemented: SET_SELL_TRIGGER")
+	autoTxKey := types.AutoTxKey{
+		Stock:  sst.stock,
+		UserID: sst.userID,
+		Action: "Buy",
+	}
+	autoTx, found := workATXStore[autoTxKey]
+	if !found {
+		// autoTx not set. Fail this trans
+		// TODO
+	}
+
+	autoTx.Trigger = sst.amount
+
+	// send trigger to autoTx manager
+
+	//consoleLog.Warning("Not implemented: SET_SELL_TRIGGER")
 }

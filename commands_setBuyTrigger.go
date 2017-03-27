@@ -63,5 +63,20 @@ func (sbt setBuyTriggerCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (sbt setBuyTriggerCmd) Execute() {
-	consoleLog.Warning("Not implemented: SET_BUY_TRIGGER")
+	autoTxKey := types.AutoTxKey{
+		Stock:  sbt.stock,
+		UserID: sbt.userID,
+		Action: "Buy",
+	}
+	autoTx, found := workATXStore[autoTxKey]
+	if !found {
+		// autoTx not set. Fail this trans
+		// TODO
+	}
+
+	autoTx.Trigger = sbt.amount
+
+	// send trigger to autoTx manager
+
+	//consoleLog.Warning("Not implemented: SET_BUY_TRIGGER")
 }
