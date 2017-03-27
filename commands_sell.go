@@ -16,7 +16,7 @@ type sellCmd struct {
 	amount         currency.Currency
 	profit         currency.Currency
 	quantityToSell uint64
-	quoteTimestamp time.Time
+	expiresAt      time.Time
 }
 
 func parseSellCmd(parts []string) sellCmd {
@@ -94,23 +94,20 @@ func (s sellCmd) Execute() {
 	}
 
 	// Check if user can sell stock at quote price
-	quantityToSell, _ := q.Price.FitsInto(s.amount)
+	quantityToSell, profit := q.Price.FitsInto(s.amount)
 	consoleLog.Debugf("Want to sell %d stock", quantityToSell)
 	if quantityToSell < 1 {
 		abortTx("Cannot sell less than one stock")
 	}
 
-	profit := q.Price
-	profit.Mul(float64(quantityToSell))
-
 	// If yes...
-	// 1. Populate the profit, quantityToSell, quoteTimestamp fields
+	// 1. Populate the profit, quantityToSell, expiresAt fields
 	// 2. Remove stock from the user
 	// 3. Add the sellCmd to the accounts pendingSells stack
 
 	s.quantityToSell = uint64(quantityToSell)
 	s.profit = profit
-	s.quoteTimestamp = q.Timestamp
+	s.expiresAt = q.Timestamp.Add(time.Second * 60)
 
 	err := acct.RemoveStock(s.stock, s.quantityToSell)
 	abortTxOnError(err, "User does not have enough stock to sell")
@@ -132,6 +129,5 @@ func (s sellCmd) RollBack() {
 }
 
 func (s sellCmd) IsExpired() bool {
-	expiry := s.quoteTimestamp.Add(time.Second * 60)
-	return time.Now().After(expiry)
+	return time.Now().After(s.expiresAt)
 }

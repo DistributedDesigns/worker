@@ -15,8 +15,8 @@ type buyCmd struct {
 	stock          string
 	amount         currency.Currency
 	purchaseAmount currency.Currency
-	quoteTimestamp time.Time
 	quantityToBuy  uint64
+	expiresAt      time.Time
 }
 
 func parseBuyCmd(parts []string) buyCmd {
@@ -86,15 +86,11 @@ func (b buyCmd) Execute() {
 	}
 
 	// Check if user can buy any stock at quote price
-	quantityToBuy, remainder := q.Price.FitsInto(b.amount)
+	quantityToBuy, purchaseAmount := q.Price.FitsInto(b.amount)
 	consoleLog.Debugf("Want to buy %d stock", quantityToBuy)
 	if quantityToBuy < 1 {
 		abortTx("Cannot buy less than one stock")
 	}
-
-	purchaseAmount := b.amount
-	err := purchaseAmount.Sub(remainder)
-	abortTxOnError(err, "This should be impossible!")
 
 	// If yes...
 	// 1. Populate the quantityToBuy, purchaseAmount and quoteTimestamp fields
@@ -103,10 +99,10 @@ func (b buyCmd) Execute() {
 
 	b.quantityToBuy = uint64(quantityToBuy)
 	b.purchaseAmount = purchaseAmount
-	b.quoteTimestamp = q.Timestamp
+	b.expiresAt = q.Timestamp.Add(time.Second * 60)
 
 	acct := accountStore[b.userID]
-	err = acct.RemoveFunds(purchaseAmount)
+	err := acct.RemoveFunds(purchaseAmount)
 	abortTxOnError(err, "User does not have enough funds to purchase stock")
 	acct.pendingBuys.Push(b)
 
@@ -126,6 +122,5 @@ func (b buyCmd) RollBack() {
 }
 
 func (b buyCmd) IsExpired() bool {
-	expiry := b.quoteTimestamp.Add(time.Second * 60)
-	return time.Now().After(expiry)
+	return time.Now().After(b.expiresAt)
 }
