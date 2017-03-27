@@ -62,7 +62,7 @@ func (a addCmd) Execute() {
 	// Create an account if one does not exist
 	if _, accountExists := accountStore[a.userID]; !accountExists {
 		consoleLog.Infof("Creating account for %s", a.userID)
-		accountStore[a.userID] = &account{userID: a.userID}
+		accountStore[a.userID] = newAccountForUser(a.userID)
 	}
 
 	userAccount := accountStore[a.userID]

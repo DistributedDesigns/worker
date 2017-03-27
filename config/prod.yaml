@@ -16,3 +16,4 @@ quote policy:
   base ttl: 59
   backoff ttl: 4
   min ttl: 3
+  use with buy: 3

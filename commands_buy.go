@@ -10,10 +10,13 @@ import (
 )
 
 type buyCmd struct {
-	id     uint64
-	userID string
-	stock  string
-	amount currency.Currency
+	id             uint64
+	userID         string
+	stock          string
+	amount         currency.Currency
+	purchaseAmount currency.Currency
+	quoteTimestamp time.Time
+	quantityToBuy  uint64
 }
 
 func parseBuyCmd(parts []string) buyCmd {
@@ -62,5 +65,62 @@ func (b buyCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (b buyCmd) Execute() {
-	consoleLog.Warning("Not implemented: BUY")
+	// Get a quote for the stock
+	qr := types.QuoteRequest{
+		Stock:      b.stock,
+		UserID:     b.userID,
+		AllowCache: true,
+		ID:         b.id,
+	}
+
+	q := getQuote(qr)
+
+	// Get a fresh quote if quote is about to expire
+	quoteTTL := q.Timestamp.Add(time.Second*60).Unix() - time.Now().Unix()
+	if quoteTTL < config.QuotePolicy.UseInBuy {
+		consoleLog.Info(" [!] Getting a fresh quote for", b.Name())
+		qr.AllowCache = false
+		q = getQuote(qr)
+	}
+
+	// Check if user can buy any stock at quote price
+	quantityToBuy, remainder := q.Price.FitsInto(b.amount)
+	consoleLog.Debugf("Want to buy %d stock", quantityToBuy)
+	if quantityToBuy < 1 {
+		abortTx("Cannot buy less than one stock " + b.Name())
+	}
+
+	purchaseAmount := b.amount
+	err := purchaseAmount.Sub(remainder)
+	abortTxOnError(err, "Problem removing funds from user")
+
+	// If yes...
+	// 1. Populate the quantityToBuy, purchaseAmount and quoteTimestamp fields
+	// 2. Remove the funds from the user
+	// 3. Add the buyCmd to the account's pendingBuys stack
+
+	b.quantityToBuy = uint64(quantityToBuy)
+	b.purchaseAmount = purchaseAmount
+	b.quoteTimestamp = q.Timestamp
+
+	acct := accountStore[b.userID]
+	acct.RemoveFunds(purchaseAmount)
+	acct.pendingBuys.push(b)
+
+	consoleLog.Notice(" [✔] Finished", b.Name())
+}
+
+func (b buyCmd) Commit() {
+	acct := accountStore[b.userID]
+	acct.AddStock(b.stock, b.quantityToBuy)
+}
+
+func (b buyCmd) RollBack() {
+	acct := accountStore[b.userID]
+	acct.AddFunds(b.purchaseAmount)
+}
+
+func (b buyCmd) IsValid() bool {
+	expiry := b.quoteTimestamp.Add(time.Second * 60)
+	return time.Now().After(expiry)
 }
