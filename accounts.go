@@ -85,3 +85,19 @@ func (ac *account) RemoveStock(stock string, quantity uint64) error {
 
 	return nil
 }
+
+// PruneExpiredTxs will remove all pendingTxs that are expired
+func (ac *account) PruneExpiredTxs() {
+	ac.Lock()
+	expiredBuys := ac.pendingBuys.SplitExpired()
+	expiredSells := ac.pendingSells.SplitExpired()
+	ac.Unlock()
+
+	for _, buy := range *expiredBuys {
+		buy.RollBack()
+	}
+
+	for _, sell := range *expiredSells {
+		sell.RollBack()
+	}
+}

@@ -55,7 +55,7 @@ func (cb commitBuyCmd) Execute() {
 	abortTxIfNoAccount(cb.userID)
 
 	acct := accountStore[cb.userID]
-	pendingBuy, err := acct.pendingBuys.pop()
+	pendingBuy, err := acct.pendingBuys.Pop()
 	abortTxOnError(err, "User has no pending buys")
 
 	if pendingBuy.IsExpired() {

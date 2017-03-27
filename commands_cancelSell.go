@@ -55,7 +55,7 @@ func (cs cancelSellCmd) Execute() {
 	abortTxIfNoAccount(cs.userID)
 
 	acct := accountStore[cs.userID]
-	pendingSell, err := acct.pendingSells.pop()
+	pendingSell, err := acct.pendingSells.Pop()
 	abortTxOnError(err, "User has no pending sells")
 
 	pendingSell.RollBack()

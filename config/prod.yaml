@@ -17,3 +17,5 @@ quote policy:
   backoff ttl: 4
   min ttl: 3
   use in buy sell: 3
+
+cleanup interval: 60

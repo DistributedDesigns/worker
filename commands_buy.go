@@ -108,17 +108,19 @@ func (b buyCmd) Execute() {
 	acct := accountStore[b.userID]
 	err = acct.RemoveFunds(purchaseAmount)
 	abortTxOnError(err, "User does not have enough funds to purchase stock")
-	acct.pendingBuys.push(b)
+	acct.pendingBuys.Push(b)
 
 	consoleLog.Notice(" [✔] Finished", b.Name())
 }
 
 func (b buyCmd) Commit() {
+	consoleLog.Debug("Commiting", b.Name())
 	acct := accountStore[b.userID]
 	acct.AddStock(b.stock, b.quantityToBuy)
 }
 
 func (b buyCmd) RollBack() {
+	consoleLog.Debug("Rolling back", b.Name())
 	acct := accountStore[b.userID]
 	acct.AddFunds(b.purchaseAmount)
 }

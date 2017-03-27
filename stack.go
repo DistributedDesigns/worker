@@ -6,17 +6,17 @@ import (
 
 type txStack []pendingTx
 
-func (s txStack) isEmpty() bool {
-	return len(s) == 0
+func (s *txStack) IsEmpty() bool {
+	return len(*s) == 0
 }
 
-func (s *txStack) push(ptx pendingTx) {
+func (s *txStack) Push(ptx pendingTx) {
 	(*s) = append(*s, ptx)
 }
 
-func (s *txStack) pop() (pendingTx, error) {
+func (s *txStack) Pop() (pendingTx, error) {
 	var ptx pendingTx
-	if (*s).isEmpty() {
+	if s.IsEmpty() {
 		return ptx, errors.New("Empty txStack")
 	}
 
@@ -26,11 +26,22 @@ func (s *txStack) pop() (pendingTx, error) {
 	return ptx, nil
 }
 
-func (s txStack) peek() (pendingTx, error) {
-	var ptx pendingTx
-	if s.isEmpty() {
-		return ptx, errors.New("Empty txStack")
+func (s *txStack) SplitExpired() *txStack {
+	var expiredTxs txStack
+	if s.IsEmpty() {
+		return &expiredTxs
 	}
 
-	return s[len(s)-1], nil
+	// Determine position of first expired item, then split stack
+	var i int
+	for i = 0; i < len(*s); i++ {
+		if !(*s)[i].IsExpired() {
+			break
+		}
+	}
+
+	expiredTxs = (*s)[:i]
+	*s = (*s)[i:]
+
+	return &expiredTxs
 }

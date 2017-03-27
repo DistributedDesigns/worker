@@ -88,6 +88,7 @@ func main() {
 	// watch auto transactions
 	go fetchNewTx(unprocessedTxs)
 	go txWorker(unprocessedTxs)
+	go cleanAccountStore()
 
 	// halt until channel is closed
 	<-done
@@ -106,7 +107,7 @@ func initConsoleLogging() {
 
 	// Add output formatting
 	var consoleFormat = logging.MustStringFormatter(
-		`%{time:15:04:05.000} %{color}▶ %{level:8s}%{color:reset} %{id:03d} %{message} %{shortfile}`,
+		`%{time:15:04:05.000} %{color}▶ %{level:8s}%{color:reset} %{id:03d} %{message} (%{shortfile})`,
 	)
 	consoleBackendFormatted := logging.NewBackendFormatter(consoleBackend, consoleFormat)
 
@@ -147,6 +148,8 @@ var config struct {
 		MinTTL       int   `yaml:"min ttl"`
 		UseInBuySell int64 `yaml:"use in buy sell"`
 	} `yaml:"quote policy"`
+
+	CleanupInterval int `yaml:"cleanup interval"`
 }
 
 func loadConfig() {
@@ -186,4 +189,22 @@ func initRedis() {
 
 	_, err := conn.Do("PING")
 	failOnError(err, "Could not establish connection with Redis")
+}
+
+// cleanAccountStore removes expired buy/sells from all accounts
+func cleanAccountStore() {
+	cleanupTicker := time.NewTicker(time.Second * time.Duration(config.CleanupInterval))
+
+	for {
+		select {
+		case <-cleanupTicker.C:
+			consoleLog.Debug("Starting account cleanup")
+			for _, acct := range accountStore {
+				acct.PruneExpiredTxs()
+			}
+			consoleLog.Debug("Done account cleanup")
+		default:
+			// Waiting for tick
+		}
+	}
 }

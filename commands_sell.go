@@ -114,17 +114,19 @@ func (s sellCmd) Execute() {
 
 	err := acct.RemoveStock(s.stock, s.quantityToSell)
 	abortTxOnError(err, "User does not have enough stock to sell")
-	acct.pendingSells.push(s)
+	acct.pendingSells.Push(s)
 
 	consoleLog.Notice(" [✔] Finished", s.Name())
 }
 
 func (s sellCmd) Commit() {
+	consoleLog.Debug("Commiting", s.Name())
 	acct := accountStore[s.userID]
 	acct.AddFunds(s.profit)
 }
 
 func (s sellCmd) RollBack() {
+	consoleLog.Debug("Rolling back", s.Name())
 	acct := accountStore[s.userID]
 	acct.AddStock(s.stock, s.quantityToSell)
 }
