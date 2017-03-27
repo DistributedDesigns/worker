@@ -95,7 +95,7 @@ func (s sellCmd) Execute() {
 
 	// Check if user can sell stock at quote price
 	quantityToSell, _ := q.Price.FitsInto(s.amount)
-	consoleLog.Debugf("Want to sell %s stock", quantityToSell)
+	consoleLog.Debugf("Want to sell %d stock", quantityToSell)
 	if quantityToSell < 1 {
 		abortTx("Cannot sell less than one stock")
 	}
