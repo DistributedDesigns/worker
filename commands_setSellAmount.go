@@ -74,12 +74,10 @@ func (ssa setSellAmountCmd) Execute() {
 		// TODO
 
 	}
-	noTrigger, err := currency.NewFromFloat(0)
-	failOnError(err, "Failed to set zero currency")
+
 	workATXStore[autoTxKey] = types.AutoTxInit{
 		Action:   "Buy",
 		Amount:   ssa.amount,
-		Trigger:  noTrigger,
 		Stock:    ssa.stock,
 		UserID:   ssa.userID,
 		WorkerID: *workerNum,

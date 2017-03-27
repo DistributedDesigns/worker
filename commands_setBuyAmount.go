@@ -74,12 +74,10 @@ func (sba setBuyAmountCmd) Execute() {
 		// TODO
 
 	}
-	noTrigger, err := currency.NewFromFloat(0)
-	failOnError(err, "Failed to set zero currency")
+
 	workATXStore[autoTxKey] = types.AutoTxInit{
 		Action:   "Buy",
 		Amount:   sba.amount,
-		Trigger:  noTrigger,
 		Stock:    sba.stock,
 		UserID:   sba.userID,
 		WorkerID: *workerNum,
