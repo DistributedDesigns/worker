@@ -142,10 +142,10 @@ var config struct {
 	}
 
 	QuotePolicy struct {
-		BaseTTL    int   `yaml:"base ttl"`
-		BackoffTTL int   `yaml:"backoff ttl"`
-		MinTTL     int   `yaml:"min ttl"`
-		UseInBuy   int64 `yaml:"use in buy"`
+		BaseTTL      int   `yaml:"base ttl"`
+		BackoffTTL   int   `yaml:"backoff ttl"`
+		MinTTL       int   `yaml:"min ttl"`
+		UseInBuySell int64 `yaml:"use in buy sell"`
 	} `yaml:"quote policy"`
 }
 

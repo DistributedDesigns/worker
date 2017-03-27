@@ -79,7 +79,7 @@ func (b buyCmd) Execute() {
 
 	// Get a fresh quote if quote is about to expire
 	quoteTTL := q.Timestamp.Add(time.Second*60).Unix() - time.Now().Unix()
-	if quoteTTL < config.QuotePolicy.UseInBuy {
+	if quoteTTL < config.QuotePolicy.UseInBuySell {
 		consoleLog.Info(" [!] Getting a fresh quote for", b.Name())
 		qr.AllowCache = false
 		q = getQuote(qr)
@@ -89,12 +89,12 @@ func (b buyCmd) Execute() {
 	quantityToBuy, remainder := q.Price.FitsInto(b.amount)
 	consoleLog.Debugf("Want to buy %d stock", quantityToBuy)
 	if quantityToBuy < 1 {
-		abortTx("Cannot buy less than one stock " + b.Name())
+		abortTx("Cannot buy less than one stock")
 	}
 
 	purchaseAmount := b.amount
 	err := purchaseAmount.Sub(remainder)
-	abortTxOnError(err, "Problem removing funds from user")
+	abortTxOnError(err, "This should be impossible!")
 
 	// If yes...
 	// 1. Populate the quantityToBuy, purchaseAmount and quoteTimestamp fields
@@ -106,7 +106,8 @@ func (b buyCmd) Execute() {
 	b.quoteTimestamp = q.Timestamp
 
 	acct := accountStore[b.userID]
-	acct.RemoveFunds(purchaseAmount)
+	err = acct.RemoveFunds(purchaseAmount)
+	abortTxOnError(err, "User does not have enough funds to purchase stock")
 	acct.pendingBuys.push(b)
 
 	consoleLog.Notice(" [✔] Finished", b.Name())
@@ -122,7 +123,7 @@ func (b buyCmd) RollBack() {
 	acct.AddFunds(b.purchaseAmount)
 }
 
-func (b buyCmd) IsValid() bool {
+func (b buyCmd) IsExpired() bool {
 	expiry := b.quoteTimestamp.Add(time.Second * 60)
 	return time.Now().After(expiry)
 }

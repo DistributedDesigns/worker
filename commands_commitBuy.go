@@ -54,10 +54,13 @@ func (cb commitBuyCmd) ToAuditEvent() types.AuditEvent {
 func (cb commitBuyCmd) Execute() {
 	abortTxIfNoAccount(cb.userID)
 
-	// Pop buy from user's pendingBuys stack
 	acct := accountStore[cb.userID]
 	pendingBuy, err := acct.pendingBuys.pop()
 	abortTxOnError(err, "User has no pending buys")
+
+	if pendingBuy.IsExpired() {
+		abortTx("Buy is expired")
+	}
 
 	pendingBuy.Commit()
 
