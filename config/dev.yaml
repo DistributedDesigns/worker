@@ -21,3 +21,6 @@ quote policy:
   base ttl: 59
   backoff ttl: 4 # ranges 0 -> n
   min ttl: 3 # Don't cache quotes with less than this TTL
+
+clean policy:
+  clean frequency: 30

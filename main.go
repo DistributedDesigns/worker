@@ -149,6 +149,10 @@ var config struct {
 		BackoffTTL int `yaml:"backoff ttl"`
 		MinTTL     int `yaml:"min ttl"`
 	} `yaml:"quote policy"`
+
+	CleanPolicy struct {
+		CleanFrequency int `yaml:"clean frequency"`
+	} `yaml:"clean policy"`
 }
 
 func loadConfig() {
