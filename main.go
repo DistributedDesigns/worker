@@ -58,6 +58,7 @@ const (
 	dumplogQ         = "dumplog"
 	quoteRequestQ    = "quote_req"
 	quoteBroadcastEx = "quote_broadcast"
+	autoTxQueue      = "autoTx"
 
 	// Redis settings
 	pendingTxTimeout = 3

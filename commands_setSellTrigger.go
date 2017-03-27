@@ -7,6 +7,7 @@ import (
 
 	"github.com/distributeddesigns/currency"
 	types "github.com/distributeddesigns/shared_types"
+	"github.com/streadway/amqp"
 )
 
 type setSellTriggerCmd struct {
@@ -76,7 +77,23 @@ func (sst setSellTriggerCmd) Execute() {
 
 	autoTx.Trigger = sst.amount
 
-	// send trigger to autoTx manager
+	ch, err := rmqConn.Channel()
+	failOnError(err, "Failed to open a channel")
+	defer ch.Close()
 
-	//consoleLog.Warning("Not implemented: SET_SELL_TRIGGER")
+	body := autoTx.ToCSV()
+
+	err = ch.Publish(
+		"",          // exchange
+		autoTxQueue, // routing key
+		false,       // mandatory
+		false,       // immediate
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Headers: amqp.Table{
+				"transType": "autoTxInit",
+			},
+			Body: []byte(body),
+		})
+	failOnError(err, "Failed to publish a message")
 }
