@@ -65,6 +65,8 @@ func (b buyCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (b buyCmd) Execute() {
+	abortTxIfNoAccount(b.userID)
+
 	// Get a quote for the stock
 	qr := types.QuoteRequest{
 		Stock:      b.stock,

@@ -52,5 +52,14 @@ func (cb cancelBuyCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (cb cancelBuyCmd) Execute() {
-	consoleLog.Warning("Not implemented: CANCEL_BUY")
+	abortTxIfNoAccount(cb.userID)
+
+	// Pop buy from user's pendingBuys stack
+	acct := accountStore[cb.userID]
+	pendingBuy, err := acct.pendingBuys.pop()
+	abortTxOnError(err, "User has no pending buys")
+
+	pendingBuy.RollBack()
+
+	consoleLog.Notice(" [✔] Finished", cb.Name())
 }
