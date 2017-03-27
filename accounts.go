@@ -21,25 +21,23 @@ type account struct {
 
 func cleanBuyStacks() {
 	consoleLog.Debug("Buy Cleanup is Running")
-	for 0 < 1 {
+	for {
 		for _, account := range accountStore {
-			account.Lock()
-			oldestBuy, err := account.pendingBuys.headPeek()
-			account.Unlock()
-			if err != nil {
-				continue
-			}
-			for oldestBuy.isExpired() {
-				consoleLog.Debugf("Pending buy for %s expired, auto cancelling", account.userID)
+			for {
 				account.Lock()
-				account.pendingBuys.dequeue()
-				refund := oldestBuy.amount
-				oldestBuy, err = account.pendingBuys.headPeek()
-				account.Unlock()
-				account.AddFunds(refund)
+				oldestBuy, err := account.pendingBuys.headPeek()
 				if err != nil {
+					account.Unlock()
 					break
 				}
+				if !oldestBuy.isExpired() {
+					account.Unlock()
+					break
+				}
+				consoleLog.Debugf("Pending buy for %s expired, auto cancelling", account.userID)
+				account.pendingBuys.dequeue()
+				account.Unlock()
+				account.AddFunds(oldestBuy.amount)
 			}
 		}
 		time.Sleep(time.Second * time.Duration(config.CleanPolicy.CleanFrequency))

@@ -23,7 +23,7 @@ func (s buyStack) isEmpty() bool {
 }
 
 func (bItem buyItem) isExpired() bool {
-	return bItem.quoteTimeStamp.Before(time.Now().Add(time.Second * -10))
+	return bItem.quoteTimeStamp.Before(time.Now().Add(time.Second * -60))
 }
 
 func (s *buyStack) push(element buyItem) {

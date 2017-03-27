@@ -46,10 +46,6 @@ func (cb cancelBuyCmd) ToAuditEntry() string {
 	)
 }
 
-func cancelBuy() {
-
-}
-
 func (cb cancelBuyCmd) Execute() {
 	userAccount := accountStore[cb.userID]
 	userAccount.Lock()
