@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+
+	types "github.com/distributeddesigns/shared_types"
 )
 
 type displaySummaryCmd struct {
@@ -29,12 +31,8 @@ func (ds displaySummaryCmd) Name() string {
 	return fmt.Sprintf("[%d] DISPLAY_SUMMARY", ds.id)
 }
 
-func (ds displaySummaryCmd) GetUserID() string {
-	return ds.userID
-}
-
-func (ds displaySummaryCmd) ToAuditEntry() string {
-	return fmt.Sprintf(`
+func (ds displaySummaryCmd) ToAuditEvent() types.AuditEvent {
+	xmlElement := fmt.Sprintf(`
 	<userCommand>
 		<timestamp>%d</timestamp>
 		<server>%s</server>
@@ -44,6 +42,13 @@ func (ds displaySummaryCmd) ToAuditEntry() string {
 	</userCommand>`,
 		time.Now().UnixNano()/1e6, redisBaseKey, ds.id, ds.userID,
 	)
+
+	return types.AuditEvent{
+		UserID:    ds.userID,
+		ID:        ds.id,
+		EventType: "command",
+		Content:   xmlElement,
+	}
 }
 
 func (ds displaySummaryCmd) Execute() {

@@ -88,8 +88,9 @@ func sendCmdToAudit() {
 			header := amqp.Table{
 				"name":      cmd.Name(),
 				"serviceID": redisBaseKey,
-				"userID":    cmd.GetUserID(),
 			}
+
+			ae := cmd.ToAuditEvent()
 
 			err := logChannel.Publish(
 				"",          // exchange
@@ -99,7 +100,7 @@ func sendCmdToAudit() {
 				amqp.Publishing{
 					Headers:     header,
 					ContentType: "text/plain",
-					Body:        []byte(cmd.ToAuditEntry()),
+					Body:        []byte(ae.ToCSV()),
 				})
 			failOnError(err, "Failed to publish a message")
 

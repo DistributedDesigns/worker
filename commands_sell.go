@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/distributeddesigns/currency"
+	types "github.com/distributeddesigns/shared_types"
 )
 
 type sellCmd struct {
@@ -38,12 +39,8 @@ func (s sellCmd) Name() string {
 	return fmt.Sprintf("[%d] SELL", s.id)
 }
 
-func (s sellCmd) GetUserID() string {
-	return s.userID
-}
-
-func (s sellCmd) ToAuditEntry() string {
-	return fmt.Sprintf(`
+func (s sellCmd) ToAuditEvent() types.AuditEvent {
+	xmlElement := fmt.Sprintf(`
 	<userCommand>
 		<timestamp>%d</timestamp>
 		<server>%s</server>
@@ -56,6 +53,13 @@ func (s sellCmd) ToAuditEntry() string {
 		time.Now().UnixNano()/1e6, redisBaseKey, s.id, s.userID,
 		s.stock, s.amount.ToFloat(),
 	)
+
+	return types.AuditEvent{
+		UserID:    s.userID,
+		ID:        s.id,
+		EventType: "command",
+		Content:   xmlElement,
+	}
 }
 
 func (s sellCmd) Execute() {

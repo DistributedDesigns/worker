@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+
+	types "github.com/distributeddesigns/shared_types"
 )
 
 type cancelSellCmd struct {
@@ -29,12 +31,8 @@ func (cs cancelSellCmd) Name() string {
 	return fmt.Sprintf("[%d] CANCEL_SELL", cs.id)
 }
 
-func (cs cancelSellCmd) GetUserID() string {
-	return cs.userID
-}
-
-func (cs cancelSellCmd) ToAuditEntry() string {
-	return fmt.Sprintf(`
+func (cs cancelSellCmd) ToAuditEvent() types.AuditEvent {
+	xmlElement := fmt.Sprintf(`
 	<userCommand>
 		<timestamp>%d</timestamp>
 		<server>%s</server>
@@ -44,6 +42,13 @@ func (cs cancelSellCmd) ToAuditEntry() string {
 	</userCommand>`,
 		time.Now().UnixNano()/1e6, redisBaseKey, cs.id, cs.userID,
 	)
+
+	return types.AuditEvent{
+		UserID:    cs.userID,
+		ID:        cs.id,
+		EventType: "command",
+		Content:   xmlElement,
+	}
 }
 
 func (cs cancelSellCmd) Execute() {
