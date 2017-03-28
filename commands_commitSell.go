@@ -59,6 +59,7 @@ func (cs commitSellCmd) Execute() {
 	abortTxOnError(err, "User has no pending sells")
 
 	if pendingSell.IsExpired() {
+		pendingSell.RollBack()
 		abortTx("Sell is expired")
 	}
 

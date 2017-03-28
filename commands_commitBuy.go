@@ -59,6 +59,7 @@ func (cb commitBuyCmd) Execute() {
 	abortTxOnError(err, "User has no pending buys")
 
 	if pendingBuy.IsExpired() {
+		pendingBuy.RollBack()
 		abortTx("Buy is expired")
 	}
 
