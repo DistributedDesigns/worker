@@ -81,15 +81,6 @@ func (b buyCmd) Execute() {
 
 	q := getQuote(qr)
 
-	acct := accountStore[b.userID]
-	acct.Lock()
-	defer acct.Unlock()
-
-	// Check to make sure use has enough funds for buy
-	if acct.balance.ToFloat() < b.amount.ToFloat() {
-		abortTx(b.Name() + " Insufficient funds")
-	}
-
 	// Get a fresh quote if quote is about to expire
 	quoteTTL := q.Timestamp.Add(time.Second*60).Unix() - time.Now().Unix()
 	if quoteTTL < config.QuotePolicy.UseInBuySell {
@@ -103,6 +94,15 @@ func (b buyCmd) Execute() {
 	consoleLog.Debugf("Want to buy %d stock", quantityToBuy)
 	if quantityToBuy < 1 {
 		abortTx(b.Name() + " Cannot buy less than one stock")
+	}
+
+	acct := accountStore[b.userID]
+	acct.Lock()
+	defer acct.Unlock()
+
+	// Check to make sure use has enough funds for buy
+	if acct.balance.ToFloat() < b.amount.ToFloat() {
+		abortTx(b.Name() + " Insufficient funds")
 	}
 
 	// If yes...

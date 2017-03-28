@@ -54,7 +54,6 @@ func (cb cancelBuyCmd) ToAuditEvent() types.AuditEvent {
 func (cb cancelBuyCmd) Execute() {
 	abortTxIfNoAccount(cb.userID)
 
-	// Pop buy from user's pendingBuys stack
 	acct := accountStore[cb.userID]
 	pendingBuy, err := acct.pendingBuys.Pop()
 	abortTxOnError(err, cb.Name()+" No pending buys")
