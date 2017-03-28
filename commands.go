@@ -3,13 +3,14 @@ package main
 import (
 	"fmt"
 	"strings"
+
+	types "github.com/distributeddesigns/shared_types"
 )
 
 type command interface {
 	Execute()
 	Name() string
-	GetUserID() string
-	ToAuditEntry() string
+	ToAuditEvent() types.AuditEvent
 }
 
 func parseCommand(s string) command {

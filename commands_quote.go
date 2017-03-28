@@ -33,12 +33,8 @@ func (q quoteCmd) Name() string {
 	return fmt.Sprintf("[%d] QUOTE", q.id)
 }
 
-func (q quoteCmd) GetUserID() string {
-	return q.userID
-}
-
-func (q quoteCmd) ToAuditEntry() string {
-	return fmt.Sprintf(`
+func (q quoteCmd) ToAuditEvent() types.AuditEvent {
+	xmlElement := fmt.Sprintf(`
 	<userCommand>
 		<timestamp>%d</timestamp>
 		<server>%s</server>
@@ -49,6 +45,13 @@ func (q quoteCmd) ToAuditEntry() string {
 	</userCommand>`,
 		time.Now().UnixNano()/1e6, redisBaseKey, q.id, q.userID, q.stock,
 	)
+
+	return types.AuditEvent{
+		UserID:    q.userID,
+		ID:        q.id,
+		EventType: "command",
+		Content:   xmlElement,
+	}
 }
 
 func (q quoteCmd) Execute() {
