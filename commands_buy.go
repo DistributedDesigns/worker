@@ -87,7 +87,7 @@ func (b buyCmd) Execute() {
 
 	// Check to make sure use has enough funds for buy
 	if acct.balance.ToFloat() < b.amount.ToFloat() {
-		abortTx("User does not have enough funds")
+		abortTx(b.Name() + " Insufficient funds")
 	}
 
 	// Get a fresh quote if quote is about to expire
@@ -102,7 +102,7 @@ func (b buyCmd) Execute() {
 	quantityToBuy, purchaseAmount := q.Price.FitsInto(b.amount)
 	consoleLog.Debugf("Want to buy %d stock", quantityToBuy)
 	if quantityToBuy < 1 {
-		abortTx("Cannot buy less than one stock")
+		abortTx(b.Name() + " Cannot buy less than one stock")
 	}
 
 	// If yes...

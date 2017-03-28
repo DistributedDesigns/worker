@@ -56,11 +56,11 @@ func (cs commitSellCmd) Execute() {
 
 	acct := accountStore[cs.userID]
 	pendingSell, err := acct.pendingSells.Pop()
-	abortTxOnError(err, "User has no pending sells")
+	abortTxOnError(err, cs.Name()+" No pending sells")
 
 	if pendingSell.IsExpired() {
 		pendingSell.RollBack()
-		abortTx("Sell is expired")
+		abortTx(cs.Name() + " Sell is expired")
 	}
 
 	pendingSell.Commit()

@@ -75,7 +75,7 @@ func (s sellCmd) Execute() {
 	// Check if user has any stock, abort early
 	stockHoldings, found := acct.portfolio[s.stock]
 	if !found || stockHoldings == 0 {
-		abortTx("User does not have any stock to sell")
+		abortTx(s.Name() + " User does not have any stock to sell")
 	}
 
 	// Get a quote for the stock
@@ -100,7 +100,7 @@ func (s sellCmd) Execute() {
 	quantityToSell, profit := q.Price.FitsInto(s.amount)
 	consoleLog.Debugf("Want to sell %d stock", quantityToSell)
 	if quantityToSell < 1 {
-		abortTx("Cannot sell less than one stock")
+		abortTx(s.Name() + "Cannot sell less than one stock")
 	}
 
 	// If yes...
@@ -113,7 +113,7 @@ func (s sellCmd) Execute() {
 	s.expiresAt = q.Timestamp.Add(time.Second * 60)
 
 	err := acct.RemoveStock(s.stock, s.quantityToSell)
-	abortTxOnError(err, "User does not have enough stock to sell")
+	abortTxOnError(err, s.Name()+" User does not have enough stock to sell")
 	acct.pendingSells.Push(s)
 
 	consoleLog.Notice(" [✔] Finished", s.Name())

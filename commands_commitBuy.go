@@ -56,11 +56,11 @@ func (cb commitBuyCmd) Execute() {
 
 	acct := accountStore[cb.userID]
 	pendingBuy, err := acct.pendingBuys.Pop()
-	abortTxOnError(err, "User has no pending buys")
+	abortTxOnError(err, cb.Name()+" No pending buys")
 
 	if pendingBuy.IsExpired() {
 		pendingBuy.RollBack()
-		abortTx("Buy is expired")
+		abortTx(cb.Name() + " Buy expired")
 	}
 
 	pendingBuy.Commit()
