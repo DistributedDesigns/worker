@@ -30,9 +30,7 @@ func newAccountForUser(userID string) *account {
 func (ac *account) AddFunds(amount currency.Currency) {
 	consoleLog.Debugf("Old balance for %s is %s", ac.userID, ac.balance)
 
-	ac.Lock()
 	ac.balance.Add(amount)
-	ac.Unlock()
 
 	consoleLog.Debugf("New balance for %s is %s", ac.userID, ac.balance)
 }
@@ -41,9 +39,7 @@ func (ac *account) AddFunds(amount currency.Currency) {
 func (ac *account) RemoveFunds(amount currency.Currency) error {
 	consoleLog.Debugf("Old balance for %s is %s", ac.userID, ac.balance)
 
-	ac.Lock()
 	err := ac.balance.Sub(amount)
-	ac.Unlock()
 
 	consoleLog.Debugf("New balance for %s is %s", ac.userID, ac.balance)
 
@@ -55,9 +51,7 @@ func (ac *account) AddStock(stock string, quantity uint64) {
 	consoleLog.Debugf("Old portfolio for %s: %d x %s",
 		ac.userID, ac.portfolio[stock], stock)
 
-	ac.Lock()
 	ac.portfolio[stock] += quantity
-	ac.Unlock()
 
 	consoleLog.Debugf("New portfolio for %s: %d x %s",
 		ac.userID, ac.portfolio[stock], stock)
@@ -65,11 +59,6 @@ func (ac *account) AddStock(stock string, quantity uint64) {
 
 // RemoveStock surrenders stock from the user's portfolio
 func (ac *account) RemoveStock(stock string, quantity uint64) error {
-	// Lock the account now so next check can be considered valid
-	// for length of function
-	ac.Lock()
-	defer ac.Unlock()
-
 	// Check to see if user can surrender that much stock
 	if ac.portfolio[stock] < quantity {
 		return errors.New("User does not have enough stock to surrender")

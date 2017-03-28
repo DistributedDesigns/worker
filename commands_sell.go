@@ -68,8 +68,11 @@ func (s sellCmd) ToAuditEvent() types.AuditEvent {
 func (s sellCmd) Execute() {
 	abortTxIfNoAccount(s.userID)
 
-	// Check if user has any stock, abort early
 	acct := accountStore[s.userID]
+	acct.Lock()
+	defer acct.Unlock()
+
+	// Check if user has any stock, abort early
 	stockHoldings, found := acct.portfolio[s.stock]
 	if !found || stockHoldings == 0 {
 		abortTx("User does not have any stock to sell")
@@ -119,13 +122,17 @@ func (s sellCmd) Execute() {
 func (s sellCmd) Commit() {
 	consoleLog.Debug("Commiting", s.Name())
 	acct := accountStore[s.userID]
+	acct.Lock()
 	acct.AddFunds(s.profit)
+	acct.Unlock()
 }
 
 func (s sellCmd) RollBack() {
 	consoleLog.Debug("Rolling back", s.Name())
 	acct := accountStore[s.userID]
+	acct.Lock()
 	acct.AddStock(s.stock, s.quantityToSell)
+	acct.Unlock()
 }
 
 func (s sellCmd) IsExpired() bool {

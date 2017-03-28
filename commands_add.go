@@ -65,10 +65,12 @@ func (a addCmd) Execute() {
 		accountStore[a.userID] = newAccountForUser(a.userID)
 	}
 
-	userAccount := accountStore[a.userID]
+	acct := accountStore[a.userID]
 
 	consoleLog.Infof("Adding %s to %s", a.amount, a.userID)
-	userAccount.AddFunds(a.amount)
+	acct.Lock()
+	acct.AddFunds(a.amount)
+	acct.Unlock()
 
 	consoleLog.Notice(" [✔] Finished", a.Name())
 }
