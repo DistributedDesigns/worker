@@ -67,6 +67,9 @@ func (b buyCmd) ToAuditEvent() types.AuditEvent {
 func (b buyCmd) Execute() {
 	abortTxIfNoAccount(b.userID)
 
+	// We want to check the most likely fail condition first. This is the case
+	// that a stock is too expensive for the buy amount. This also minimizes
+	// the time that an accout is locked.
 	// Get a quote for the stock
 	qr := types.QuoteRequest{
 		Stock:      b.stock,
@@ -76,6 +79,14 @@ func (b buyCmd) Execute() {
 	}
 
 	q := getQuote(qr)
+
+	// Check to make sure use has enough funds for buy
+	acct := accountStore[b.userID]
+	acct.Lock()
+	if acct.balance.ToFloat() < b.amount.ToFloat() {
+		acct.Unlock()
+		abortTx("User does not have enough funds")
+	}
 
 	// Get a fresh quote if quote is about to expire
 	quoteTTL := q.Timestamp.Add(time.Second*60).Unix() - time.Now().Unix()
@@ -89,11 +100,12 @@ func (b buyCmd) Execute() {
 	quantityToBuy, purchaseAmount := q.Price.FitsInto(b.amount)
 	consoleLog.Debugf("Want to buy %d stock", quantityToBuy)
 	if quantityToBuy < 1 {
+		acct.Unlock()
 		abortTx("Cannot buy less than one stock")
 	}
 
 	// If yes...
-	// 1. Populate the quantityToBuy, purchaseAmount and quoteTimestamp fields
+	// 1. Populate the quantityToBuy, purchaseAmount and expiresAt fields
 	// 2. Remove the funds from the user
 	// 3. Add the buyCmd to the account's pendingBuys stack
 
@@ -101,9 +113,9 @@ func (b buyCmd) Execute() {
 	b.purchaseAmount = purchaseAmount
 	b.expiresAt = q.Timestamp.Add(time.Second * 60)
 
-	acct := accountStore[b.userID]
+	acct.Unlock()
 	err := acct.RemoveFunds(purchaseAmount)
-	abortTxOnError(err, "User does not have enough funds to purchase stock")
+	abortTxOnError(err, "This should be impossible!")
 	acct.pendingBuys.Push(b)
 
 	consoleLog.Notice(" [✔] Finished", b.Name())
