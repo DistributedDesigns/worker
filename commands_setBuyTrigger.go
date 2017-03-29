@@ -72,7 +72,9 @@ func (sbt setBuyTriggerCmd) Execute() {
 	autoTx, found := workATXStore[autoTxKey]
 	if !found {
 		// autoTx not set. Fail this trans
-		// TODO
+		consoleLog.Errorf("Trigger set without Amount for user %s's buy transaction on stock %s. Failing Transaction\n",
+			sbt.userID, sbt.stock)
+		return
 	}
 
 	autoTx.Trigger = sbt.amount
@@ -89,7 +91,7 @@ func (sbt setBuyTriggerCmd) Execute() {
 		false,       // mandatory
 		false,       // immediate
 		amqp.Publishing{
-			ContentType: "text/plain",
+			ContentType: "text/csv",
 			Headers: amqp.Table{
 				"transType": "autoTxInit",
 			},
