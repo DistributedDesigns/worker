@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"strconv"
+
+	types "github.com/distributeddesigns/shared_types"
+	"github.com/streadway/amqp"
 )
 
 func receiveAutoTx() {
@@ -17,6 +20,15 @@ func receiveAutoTx() {
 	// exist before we start using them.
 	// Recieve requests
 
+	err = ch.ExchangeDeclare(
+		autoTxExchange,      // name
+		amqp.ExchangeDirect, // type
+		true,                // durable
+		false,               // auto-deleted
+		false,               // internal
+		false,               // no-wait
+		nil,                 // args
+	)
 	failOnError(err, "Failed to declare exchange")
 	q, err := ch.QueueDeclare(
 		"",    // name
@@ -49,8 +61,11 @@ func receiveAutoTx() {
 	failOnError(err, "Failed to consume on exchange")
 
 	for d := range msgs {
-		fmt.Printf("Response Received\n")
-		fmt.Println(d)
+		//fmt.Printf("Response Received\n")
+		autoTx, err := types.ParseAutoTxFilled(string(d.Body[:]))
+		failOnError(err, "Failed to parse autoTxInit")
+		fmt.Printf("AutoTX is : %+v\n", autoTx)
+		// do account add and lock here, needs rebase
 	}
 
 	// failOnError(err, "Failed to consume from quoteBroadcast Channel")
