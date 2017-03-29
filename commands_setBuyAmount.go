@@ -80,6 +80,6 @@ func (sba setBuyAmountCmd) Execute() {
 		Amount:    sba.amount,
 		WorkerID:  *workerNum,
 	}
-	fmt.Println(workATXStore)
+	//fmt.Println(workATXStore)
 	// consoleLog.Warning("Not implemented: SET_BUY_AMOUNT")
 }

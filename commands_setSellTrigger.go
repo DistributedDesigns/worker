@@ -98,4 +98,5 @@ func (sst setSellTriggerCmd) Execute() {
 			Body: []byte(body),
 		})
 	failOnError(err, "Failed to publish a message")
+	consoleLog.Debugf("Published aTx %v successfully", autoTx)
 }

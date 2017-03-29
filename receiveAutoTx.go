@@ -8,6 +8,10 @@ import (
 	"github.com/streadway/amqp"
 )
 
+const (
+	aTxReceiveQueue = "autoTx_receive"
+)
+
 func receiveAutoTx() {
 	// get channel
 	ch, err := rmqConn.Channel()
@@ -30,13 +34,15 @@ func receiveAutoTx() {
 		nil,                 // args
 	)
 	failOnError(err, "Failed to declare exchange")
+	queueName, err := fmt.Printf("%s:%d", aTxReceiveQueue, *workerNum)
+	failOnError(err, "Failed to name queue")
 	q, err := ch.QueueDeclare(
-		"",    // name
-		true,  // durable
-		false, // delete when unused
-		false, // exclusive
-		false, // no wait
-		nil,   // arguments
+		queueName, // name
+		true,      // durable
+		false,     // delete when unused
+		false,     // exclusive
+		false,     // no wait
+		nil,       // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
 

@@ -98,5 +98,5 @@ func (sbt setBuyTriggerCmd) Execute() {
 			Body: []byte(body),
 		})
 	failOnError(err, "Failed to publish a message")
-	fmt.Println("Published successfully")
+	consoleLog.Debugf("Published aTx %v successfully", autoTx)
 }
