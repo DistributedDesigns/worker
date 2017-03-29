@@ -70,7 +70,7 @@ func receiveAutoTx() {
 		//fmt.Printf("Response Received\n")
 		autoTx, err := types.ParseAutoTxFilled(string(d.Body[:]))
 		failOnError(err, "Failed to parse autoTxInit")
-		fmt.Printf("AutoTX is : %+v\n", autoTx)
+		consoleLog.Debugf("AutoTxFilled is : %+v\n", autoTx)
 		// do account add and lock here, needs rebase
 	}
 
