@@ -59,6 +59,7 @@ const (
 	quoteRequestQ    = "quote_req"
 	quoteBroadcastEx = "quote_broadcast"
 	autoTxQueue      = "autoTx"
+	autoTxExchange   = "autoTx_resolved"
 
 	// Redis settings
 	pendingTxTimeout = 3
@@ -86,6 +87,8 @@ func main() {
 
 	// open http connections
 	go incomingTxWatcher()
+
+	go receiveAutoTx()
 
 	// Start concurrent actions
 	go catchQuoteBroadcasts()
@@ -174,6 +177,17 @@ func initRMQ() {
 	var err error
 	rmqConn, err = amqp.Dial(rabbitAddress)
 	failOnError(err, "Failed to rmqConnect to RabbitMQ")
+
+	// msg, err := ch.Consume(
+	// 	q.Name, // queue
+	// 	"",          // consumer
+	// 	true,        // auto-ack
+	// 	false,       // exclusive
+	// 	false,       // no-local
+	// 	false,       // no-wait
+	// 	nil,         // args
+	// )
+	// failOnError()
 	// closed in main()
 }
 

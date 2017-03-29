@@ -76,11 +76,9 @@ func (ssa setSellAmountCmd) Execute() {
 	}
 
 	workATXStore[autoTxKey] = types.AutoTxInit{
-		Action:   "Buy",
-		Amount:   ssa.amount,
-		Stock:    ssa.stock,
-		UserID:   ssa.userID,
-		WorkerID: *workerNum,
+		AutoTxKey: autoTxKey,
+		Amount:    ssa.amount,
+		WorkerID:  *workerNum,
 	}
 	// consoleLog.Warning("Not implemented: SET_SELL_AMOUNT")
 }

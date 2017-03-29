@@ -76,11 +76,10 @@ func (sba setBuyAmountCmd) Execute() {
 	}
 
 	workATXStore[autoTxKey] = types.AutoTxInit{
-		Action:   "Buy",
-		Amount:   sba.amount,
-		Stock:    sba.stock,
-		UserID:   sba.userID,
-		WorkerID: *workerNum,
+		AutoTxKey: autoTxKey,
+		Amount:    sba.amount,
+		WorkerID:  *workerNum,
 	}
+	fmt.Println(workATXStore)
 	// consoleLog.Warning("Not implemented: SET_BUY_AMOUNT")
 }
