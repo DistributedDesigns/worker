@@ -34,7 +34,7 @@ func receiveAutoTx() {
 		nil,                 // args
 	)
 	failOnError(err, "Failed to declare exchange")
-	queueName, err := fmt.Printf("%s:%d", aTxReceiveQueue, *workerNum)
+	queueName := fmt.Sprintf("%s:%d", aTxReceiveQueue, *workerNum)
 	failOnError(err, "Failed to name queue")
 	q, err := ch.QueueDeclare(
 		queueName, // name
