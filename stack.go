@@ -32,7 +32,7 @@ func (s *buyStack) push(element buyItem) {
 
 func (s *buyStack) pop() (buyItem, error) {
 	var val buyItem
-	if (*s).isEmpty() == true {
+	if (*s).isEmpty() {
 		return val, errors.New("Empty Stack")
 	}
 	val = (*s)[len(*s)-1]
@@ -40,17 +40,17 @@ func (s *buyStack) pop() (buyItem, error) {
 	return val, nil
 }
 
-func (s buyStack) peek() (buyItem, error) {
+func (s *buyStack) peek() (buyItem, error) {
 	var val buyItem
-	if s.isEmpty() == true {
+	if (*s).isEmpty() {
 		return val, errors.New("Empty Stack")
 	}
-	return s[len(s)-1], nil
+	return (*s)[len((*s))-1], nil
 }
 
 func (s *buyStack) dequeue() (buyItem, error) {
 	var val buyItem
-	if (*s).isEmpty() == true {
+	if (*s).isEmpty() {
 		return val, errors.New("Empty Stack")
 	}
 	val = (*s)[0]
@@ -58,10 +58,10 @@ func (s *buyStack) dequeue() (buyItem, error) {
 	return val, nil
 }
 
-func (s buyStack) headPeek() (buyItem, error) {
+func (s *buyStack) headPeek() (buyItem, error) {
 	var val buyItem
-	if s.isEmpty() == true {
+	if (*s).isEmpty() {
 		return val, errors.New("Empty Stack")
 	}
-	return s[0], nil
+	return (*s)[0], nil
 }

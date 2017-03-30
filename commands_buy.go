@@ -81,14 +81,14 @@ func (b buyCmd) Execute() {
 
 	var theQuote types.Quote
 	theQuote = getQuote(qr)
-	numStocks, _ := theQuote.Price.FitsInto(b.amount)
-	spent := theQuote.Price
-	spent.Mul(float64(numStocks))
-	if numStocks > 0 {
+	numStocks, spent := theQuote.Price.FitsInto(b.amount)
+	if numStocks < 1 {
+		abortTx("Cannot buy less than one stock")
+	} else {
 		consoleLog.Infof("Queuing buy %s of %s for %s", spent, b.stock, b.userID)
 		consoleLog.Debugf("Removing %s from %s", spent, b.userID)
-		userAccount.RemoveFunds(spent)
-
+		err := userAccount.RemoveFunds(spent)
+		abortTxOnError(err, "Error removing funds for buy, cancelling transaction")
 		bi := buyItem{
 			amount:         spent,
 			numStocks:      numStocks,
@@ -99,8 +99,6 @@ func (b buyCmd) Execute() {
 		userAccount.Lock()
 		userAccount.pendingBuys.push(bi)
 		userAccount.Unlock()
-	} else {
-		consoleLog.Debugf("User %s, insufficient funds for single stock of %s", b.userID, b.stock)
 	}
 
 	consoleLog.Notice(" [✔] Finished", b.Name())
