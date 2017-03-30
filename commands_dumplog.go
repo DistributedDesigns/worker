@@ -2,10 +2,14 @@ package main
 
 import (
 	"fmt"
+	"path"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	types "github.com/distributeddesigns/shared_types"
+	"github.com/streadway/amqp"
 )
 
 type dumplogCmd struct {
@@ -71,5 +75,48 @@ func (dl dumplogCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (dl dumplogCmd) Execute() {
-	consoleLog.Warning("Not implemented: DUMPLOG")
+	dlr := types.DumplogRequest{
+		UserID:   dl.userID,
+		Filename: safeFileName(dl.filename),
+	}
+
+	// Optimistically send request. It's up to the user to retrieve the file~
+	ch, err := rmqConn.Channel()
+	failOnError(err, "Failed to open a channel")
+	defer ch.Close()
+
+	err = ch.Publish(
+		"",       // exchange
+		dumplogQ, // routing key
+		false,    // mandatory
+		false,    // immediate
+		amqp.Publishing{
+			ContentType: "text/csv",
+			Body:        []byte(dlr.ToCSV()),
+		})
+	failOnError(err, "Failed to publish a message")
+
+	consoleLog.Debug("Dumplog requested as", dlr.Filename)
+
+	consoleLog.Notice(" [✔] Finished", dl.Name())
+}
+
+// Convert to a string that's suitable for use as a filename.
+// Lifted from asaskevich/govalidator
+func safeFileName(str string) string {
+	name := strings.ToLower(str)
+	name = path.Clean(path.Base(name))
+	name = strings.Trim(name, " ")
+	separators, err := regexp.Compile(`[ &_=+:]`)
+	if err == nil {
+		name = separators.ReplaceAllString(name, "-")
+	}
+	legal, err := regexp.Compile(`[^[:alnum:]-.]`)
+	if err == nil {
+		name = legal.ReplaceAllString(name, "")
+	}
+	for strings.Contains(name, "--") {
+		name = strings.Replace(name, "--", "-", -1)
+	}
+	return name
 }
