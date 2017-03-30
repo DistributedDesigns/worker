@@ -67,9 +67,17 @@ func (b buyCmd) ToAuditEvent() types.AuditEvent {
 func (b buyCmd) Execute() {
 	abortTxIfNoAccount(b.userID)
 
-	// We want to check the most likely fail condition first. This is the case
-	// that a stock is too expensive for the buy amount. This also minimizes
-	// the time that an accout is locked.
+	acct := accountStore[b.userID]
+	acct.Lock()
+	defer acct.Unlock()
+
+	// Check to make sure use has enough funds for buy.
+	// Even though this check locks the user account for the duration of a
+	// quote retrieval it passes back an error message that is most informative
+	// for the user.
+	if acct.balance.ToFloat() < b.amount.ToFloat() {
+		abortTx(b.Name() + " Insufficient funds")
+	}
 
 	// Get a quote for the stock
 	qr := types.QuoteRequest{
@@ -94,15 +102,6 @@ func (b buyCmd) Execute() {
 	consoleLog.Debugf("Want to buy %d stock", quantityToBuy)
 	if quantityToBuy < 1 {
 		abortTx(b.Name() + " Cannot buy less than one stock")
-	}
-
-	acct := accountStore[b.userID]
-	acct.Lock()
-	defer acct.Unlock()
-
-	// Check to make sure use has enough funds for buy
-	if acct.balance.ToFloat() < b.amount.ToFloat() {
-		abortTx(b.Name() + " Insufficient funds")
 	}
 
 	// If yes...
