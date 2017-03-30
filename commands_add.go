@@ -63,6 +63,7 @@ func (a addCmd) Execute() {
 	if _, accountExists := accountStore[a.userID]; !accountExists {
 		consoleLog.Infof("Creating account for %s", a.userID)
 		accountStore[a.userID] = &account{userID: a.userID}
+		accountStore[a.userID].stockPortfolio = make(portfolio)
 	}
 
 	userAccount := accountStore[a.userID]

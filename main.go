@@ -89,6 +89,9 @@ func main() {
 	go fetchNewTx(unprocessedTxs)
 	go txWorker(unprocessedTxs)
 
+	// Start Buy/Sell cleanups
+	go cleanBuyStacks()
+
 	// halt until channel is closed
 	<-done
 }
@@ -146,6 +149,10 @@ var config struct {
 		BackoffTTL int `yaml:"backoff ttl"`
 		MinTTL     int `yaml:"min ttl"`
 	} `yaml:"quote policy"`
+
+	CleanPolicy struct {
+		CleanFrequency int `yaml:"clean frequency"`
+	} `yaml:"clean policy"`
 }
 
 func loadConfig() {

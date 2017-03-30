@@ -62,5 +62,47 @@ func (b buyCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (b buyCmd) Execute() {
-	consoleLog.Warning("Not implemented: BUY")
+	consoleLog.Debug("Starting Buy")
+	if _, accountExists := accountStore[b.userID]; !accountExists {
+		consoleLog.Errorf("No account for %s exists", b.userID)
+		return
+	}
+
+	userAccount := accountStore[b.userID]
+
+	if userAccount.balance.ToFloat() < b.amount.ToFloat() {
+		consoleLog.Errorf("User %s does not have enough available funds for this purchase", b.userID)
+		return
+	}
+
+	qr := types.QuoteRequest{
+		Stock:      b.stock,
+		UserID:     b.userID,
+		AllowCache: true,
+		ID:         b.id,
+	}
+
+	var theQuote types.Quote
+	theQuote = getQuote(qr)
+	numStocks, spent := theQuote.Price.FitsInto(b.amount)
+	if numStocks < 1 {
+		abortTx("Cannot buy less than one stock")
+	} else {
+		consoleLog.Infof("Queuing buy %s of %s for %s", spent, b.stock, b.userID)
+		consoleLog.Debugf("Removing %s from %s", spent, b.userID)
+		err := userAccount.RemoveFunds(spent)
+		abortTxOnError(err, "Error removing funds for buy, cancelling transaction")
+		bi := buyItem{
+			amount:         spent,
+			numStocks:      numStocks,
+			price:          theQuote.Price,
+			stock:          b.stock,
+			quoteTimeStamp: theQuote.Timestamp,
+		}
+		userAccount.Lock()
+		userAccount.pendingBuys.push(bi)
+		userAccount.Unlock()
+	}
+
+	consoleLog.Notice(" [✔] Finished", b.Name())
 }

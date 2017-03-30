@@ -52,5 +52,15 @@ func (cb cancelBuyCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (cb cancelBuyCmd) Execute() {
-	consoleLog.Warning("Not implemented: CANCEL_BUY")
+	userAccount := accountStore[cb.userID]
+	userAccount.Lock()
+	bItem, err := userAccount.pendingBuys.pop()
+	userAccount.Unlock()
+	if err != nil {
+		consoleLog.Debugf("Cannot cancel buy, no pending buys for %s", cb.userID)
+		return
+	}
+	consoleLog.Debugf("Buy cancelled, refunding account")
+	userAccount.AddFunds(bItem.amount)
+	consoleLog.Notice(" [✔] Finished", cb.Name())
 }

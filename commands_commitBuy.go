@@ -52,5 +52,21 @@ func (cb commitBuyCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (cb commitBuyCmd) Execute() {
-	consoleLog.Warning("Not implemented: COMMIT_BUY")
+	userAccount := accountStore[cb.userID]
+	userAccount.Lock()
+	bItem, err := userAccount.pendingBuys.pop()
+	userAccount.Unlock()
+	if err != nil {
+		consoleLog.Debugf("Cannot confirm buy, no pending buys for %s", cb.userID)
+		return
+	}
+
+	if bItem.isExpired() {
+		consoleLog.Noticef("Stock price has expired, unable to confirm; refunding account")
+		userAccount.AddFunds(bItem.amount)
+		return
+	}
+	consoleLog.Debugf("%s purchased %s of %s stock, adding to portfolio", cb.userID, bItem.amount, bItem.stock)
+	userAccount.stockPortfolio[bItem.stock] += bItem.numStocks
+	consoleLog.Notice(" [✔] Finished", cb.Name())
 }
