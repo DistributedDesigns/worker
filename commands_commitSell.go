@@ -52,5 +52,18 @@ func (cs commitSellCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (cs commitSellCmd) Execute() {
-	consoleLog.Warning("Not implemented: COMMIT_SELL")
+	abortTxIfNoAccount(cs.userID)
+
+	acct := accountStore[cs.userID]
+	pendingSell, err := acct.pendingSells.Pop()
+	abortTxOnError(err, cs.Name()+" No pending sells")
+
+	if pendingSell.IsExpired() {
+		pendingSell.RollBack()
+		abortTx(cs.Name() + " Sell is expired")
+	}
+
+	pendingSell.Commit()
+
+	consoleLog.Notice(" [✔] Finished", cs.Name())
 }

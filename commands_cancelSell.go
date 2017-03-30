@@ -52,5 +52,13 @@ func (cs cancelSellCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (cs cancelSellCmd) Execute() {
-	consoleLog.Warning("Not implemented: CANCEL_SELL")
+	abortTxIfNoAccount(cs.userID)
+
+	acct := accountStore[cs.userID]
+	pendingSell, err := acct.pendingSells.Pop()
+	abortTxOnError(err, cs.Name()+" No pending sells")
+
+	pendingSell.RollBack()
+
+	consoleLog.Notice(" [✔] Finished", cs.Name())
 }

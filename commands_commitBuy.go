@@ -52,5 +52,18 @@ func (cb commitBuyCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (cb commitBuyCmd) Execute() {
-	consoleLog.Warning("Not implemented: COMMIT_BUY")
+	abortTxIfNoAccount(cb.userID)
+
+	acct := accountStore[cb.userID]
+	pendingBuy, err := acct.pendingBuys.Pop()
+	abortTxOnError(err, cb.Name()+" No pending buys")
+
+	if pendingBuy.IsExpired() {
+		pendingBuy.RollBack()
+		abortTx(cb.Name() + " Buy expired")
+	}
+
+	pendingBuy.Commit()
+
+	consoleLog.Notice(" [✔] Finished", cb.Name())
 }
