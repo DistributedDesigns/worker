@@ -39,7 +39,7 @@ func parseDumplogCmd(parts []string) dumplogCmd {
 		filename = parts[3]
 	}
 
-	return dumplogCmd{id, userID, filename}
+	return dumplogCmd{id, userID, safeFileName(filename)}
 }
 
 func (dl dumplogCmd) Name() string {
@@ -77,7 +77,7 @@ func (dl dumplogCmd) ToAuditEvent() types.AuditEvent {
 func (dl dumplogCmd) Execute() {
 	dlr := types.DumplogRequest{
 		UserID:   dl.userID,
-		Filename: safeFileName(dl.filename),
+		Filename: dl.filename,
 	}
 
 	// Optimistically send request. It's up to the user to retrieve the file~
@@ -101,22 +101,20 @@ func (dl dumplogCmd) Execute() {
 	consoleLog.Notice(" [✔] Finished", dl.Name())
 }
 
+// Compile the file sanitization regexps once and only once
+var (
+	separators = regexp.MustCompile(`[ &_=+:]`)
+	legal      = regexp.MustCompile(`[^[:alnum:]-.]`)
+)
+
 // Convert to a string that's suitable for use as a filename.
 // Lifted from asaskevich/govalidator
 func safeFileName(str string) string {
 	name := strings.ToLower(str)
-	name = path.Clean(path.Base(name))
+	name = path.Clean(path.Base(name)) // "./foo/bar" -> "bar"
 	name = strings.Trim(name, " ")
-	separators, err := regexp.Compile(`[ &_=+:]`)
-	if err == nil {
-		name = separators.ReplaceAllString(name, "-")
-	}
-	legal, err := regexp.Compile(`[^[:alnum:]-.]`)
-	if err == nil {
-		name = legal.ReplaceAllString(name, "")
-	}
-	for strings.Contains(name, "--") {
-		name = strings.Replace(name, "--", "-", -1)
-	}
+	name = separators.ReplaceAllString(name, "-")
+	name = legal.ReplaceAllString(name, "")
+	name = strings.Replace(name, "--", "-", -1)
 	return name
 }
