@@ -21,3 +21,8 @@ quote policy:
   base ttl: 59
   backoff ttl: 4 # ranges 0 -> n
   min ttl: 3 # Don't cache quotes with less than this TTL
+  use in buy sell: 3 # Get a new quote for a buy if TTL smaller than this
+
+# How often user accounts will be crawled for removal of expired
+# pending buy / sells
+cleanup interval: 60 # seconda

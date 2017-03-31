@@ -79,6 +79,12 @@ func catchAbortedTx() {
 	}
 }
 
+func abortTxIfNoAccount(userID string) {
+	if _, found := accountStore[userID]; !found {
+		panic("Cannot perform this command on users without an account")
+	}
+}
+
 func cleanUpTxs(unprocessedTxs <-chan string) {
 	// TODO: Put these back in redis? Just warn for now.
 	if len(unprocessedTxs) > 0 {
