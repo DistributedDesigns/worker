@@ -14,6 +14,8 @@ type commandStruct struct {
 
 var conn redis.Conn
 
+var reqCounter uint64
+
 func handler(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
@@ -24,17 +26,20 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	//Validate Command
 	//Add it to Redis
-	_, err = conn.Do("RPUSH", pendingTxKey, cmd.Command)
+	redisCmd := fmt.Sprintf("[%d] %s\n", reqCounter, cmd.Command)
+	_, err = conn.Do("RPUSH", pendingTxKey, redisCmd)
 
 	failOnError(err, "Failed to push to worker queue")
+	reqCounter++
 	responseText := fmt.Sprintf("Successfully performed %s\n", cmd.Command)
 	fmt.Fprintf(w, responseText, r.URL.Path[1:])
 }
 
 func incomingTxWatcher() {
+
 	conn = redisPool.Get()
 	port := fmt.Sprintf(":%d", config.Redis.Port+*workerNum)
-	consoleLog.Debugf("Started watching on port %s\n", port)
+	fmt.Printf("Started watching on port %s\n", port)
 	http.HandleFunc("/", handler)
 	http.ListenAndServe(port, nil)
 }

@@ -80,6 +80,8 @@ func main() {
 	// Capped channel of tx pulled out of redis
 	unprocessedTxs := make(chan string, 2)
 
+	// socket shit ;_;
+
 	// open http connections
 	go incomingTxWatcher()
 
