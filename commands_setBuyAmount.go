@@ -63,5 +63,23 @@ func (sba setBuyAmountCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (sba setBuyAmountCmd) Execute() {
-	consoleLog.Warning("Not implemented: SET_BUY_AMOUNT")
+	autoTxKey := types.AutoTxKey{
+		Stock:  sba.stock,
+		UserID: sba.userID,
+		Action: "Buy",
+	}
+	_, found := workATXStore[autoTxKey]
+	if found {
+		// autoTx already exists, we'll need to cancel it.
+		// TODO
+
+	}
+
+	workATXStore[autoTxKey] = types.AutoTxInit{
+		AutoTxKey: autoTxKey,
+		Amount:    sba.amount,
+		WorkerID:  *workerNum,
+	}
+	//fmt.Println(workATXStore)
+	// consoleLog.Warning("Not implemented: SET_BUY_AMOUNT")
 }
