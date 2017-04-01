@@ -52,5 +52,16 @@ func (ds displaySummaryCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (ds displaySummaryCmd) Execute() {
-	consoleLog.Warning("Not implemented: DISPLAY_SUMMARY")
+	abortTxIfNoAccount(ds.userID)
+
+	acct := accountStore[ds.userID]
+	acct.Lock()
+	defer acct.Unlock()
+
+	_ = acct.GetSummary()
+
+	// TODO: Send other account data. Format will depend on FE implementation.
+
+	acct.AddSummaryItem("Finished " + ds.Name())
+	consoleLog.Notice(" [✔] Finished", ds.Name())
 }

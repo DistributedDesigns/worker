@@ -75,6 +75,8 @@ func (dl dumplogCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (dl dumplogCmd) Execute() {
+	abortTxIfNoAccount(dl.userID)
+
 	dlr := types.DumplogRequest{
 		UserID:   dl.userID,
 		Filename: dl.filename,
@@ -97,6 +99,9 @@ func (dl dumplogCmd) Execute() {
 	failOnError(err, "Failed to publish a message")
 
 	consoleLog.Debug("Dumplog requested as", dlr.Filename)
+
+	acct := accountStore[dl.userID]
+	acct.AddSummaryItem("Finished " + dl.Name())
 
 	consoleLog.Notice(" [✔] Finished", dl.Name())
 }
