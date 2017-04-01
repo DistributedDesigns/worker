@@ -70,6 +70,7 @@ func (a addCmd) Execute() {
 	consoleLog.Infof("Adding %s to %s", a.amount, a.userID)
 	acct.Lock()
 	acct.AddFunds(a.amount)
+	acct.AddSummaryItem("Finished " + a.Name())
 	acct.Unlock()
 
 	consoleLog.Notice(" [✔] Finished", a.Name())
