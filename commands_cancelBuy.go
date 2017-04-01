@@ -60,5 +60,6 @@ func (cb cancelBuyCmd) Execute() {
 
 	pendingBuy.RollBack()
 
+	acct.AddSummaryItem("Finished " + cb.Name())
 	consoleLog.Notice(" [✔] Finished", cb.Name())
 }
