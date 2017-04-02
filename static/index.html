@@ -66,28 +66,30 @@ function SendPost(command) {
 }
 function Auth() {
   var userID = document.getElementById("userid").value
-  var password = document.getElementById(pwd)
+  var password = document.getElementById("pwd").value
   console.log("Auth")
   console.log(userID)
 }
 function Add() {
   var userID = document.getElementById("userid").value
-  var addamount = document.getElementById(addamount)
-  var cmd = "ADD,"+userID+","+addamount
+  var addamount = document.getElementById("addamount").value
+  var cmd = "ADD,"+userID+","+String(addamount)
   SendPost(cmd)
   console.log("Add")
+  console.log(typeof (addamount))
+  console.log(typeof (userID))
 }
 function Quote() {
   var userID = document.getElementById("userid").value
-  var stocksymbol = document.getElementById(quotestocksymbol)
+  var stocksymbol = document.getElementById("quotestocksymbol").value
   var cmd = "QUOTE,"+userID+","+stocksymbol
   SendPost(cmd)
   console.log("Quote")
 }
 function Buy() {
   var userID = document.getElementById("userid").value
-  var stocksymbol = document.getElementById(buystocksymbol)
-  var amnt = document.getElementById(buyamount)
+  var stocksymbol = document.getElementById("buystocksymbol").value
+  var amnt = document.getElementById("buyamount").value
   var cmd = "BUY,"+userID+","+stocksymbol+","+amnt
   SendPost(cmd)
   console.log("Buy")
@@ -104,8 +106,8 @@ function CancelBuy() {
 }
 function Sell() {
   var userID = document.getElementById("userid").value
-  var stocksymbol = document.getElementById(sellstocksymbol)
-  var amnt = document.getElementById(sellamount)
+  var stocksymbol = document.getElementById("sellstocksymbol").value
+  var amnt = document.getElementById("sellamount").value
   var cmd = "SELL,"+userID+","+stocksymbol+","+amnt
   SendPost(cmd)
   console.log("Sell")
@@ -122,46 +124,46 @@ function CancelSell() {
 }
 function SetBuyAmount() {
   var userID = document.getElementById("userid").value
-  var stocksymbol = document.getElementById(setbuystocksymbol)
-  var amnt = document.getElementById(setbuyamount)
+  var stocksymbol = document.getElementById("setbuystocksymbol").value
+  var amnt = document.getElementById("setbuyamount").value
   var cmd = "SET_BUY_AMOUNT,"+userID+","+stocksymbol+","+amnt
   SendPost(cmd)
   console.log("Set buy amount")
 }
 function CancelSetBuy() {
   var userID = document.getElementById("userid").value
-  var stocksymbol = document.getElementById(cancelbuystocksymbol)
+  var stocksymbol = document.getElementById("cancelbuystocksymbol").value
   var cmd = "CANCEL_SET_BUY,"+userID+","+stocksymbol
   SendPost(cmd)
   console.log("Cancel set buy")
 }
 function SetBuyTrigger() {
   var userID = document.getElementById("userid").value
-  var stocksymbol = document.getElementById(setbuytrigstocksymbol)
-  var amnt = document.getElementById(setbuytrigamount)
+  var stocksymbol = document.getElementById("setbuytrigstocksymbol").value
+  var amnt = document.getElementById("setbuytrigamount").value
   var cmd = "SET_BUY_TRIGGER,"+userID+","+stocksymbol+","+amnt
   SendPost(cmd)
   console.log("Set buy trigger")
 }
 function SetSellAmount() {
   var userID = document.getElementById("userid").value
-  var stocksymbol = document.getElementById(setsellstocksymbol)
-  var amnt = document.getElementById(setsellamount)
+  var stocksymbol = document.getElementById("setsellstocksymbol").value
+  var amnt = document.getElementById("setsellamount").value
   var cmd = "SET_SELL_AMOUNT,"+userID+","+stocksymbol+","+amnt
   SendPost(cmd)
   console.log("Set Sell Amount")
 }
 function CancelSetSell() {
   var userID = document.getElementById("userid").value
-  var stocksymbol = document.getElementById(cancelsellstocksymbol)
+  var stocksymbol = document.getElementById("cancelsellstocksymbol").value
   var cmd = "CANCEL_SET_SELL,"+userID+","+stocksymbol
   SendPost(cmd)
   console.log("Cancel set sell")
 }
 function SetSellTrigger() {
   var userID = document.getElementById("userid").value
-  var stocksymbol = document.getElementById(setselltrigstocksymbol)
-  var amnt = document.getElementById(setselltrigamount)
+  var stocksymbol = document.getElementById("setselltrigstocksymbol").value
+  var amnt = document.getElementById("setselltrigamount").value
   var cmd = "SET_SELL_TRIGGER,"+userID+","+stocksymbol+","+amnt
   SendPost(cmd)
   console.log("Set sell trigger")
@@ -174,7 +176,7 @@ function Dumplog() {
   }
   else
   {
-    var fn = document.getElementById(dumplogfile)
+    var fn = document.getElementById("dumplogfile").value
     var cmd = "DUMPLOG,"+userID+","+fn
     SendPost(cmd)
     console.log("User Dump")
