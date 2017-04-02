@@ -65,5 +65,6 @@ func (cs commitSellCmd) Execute() {
 
 	pendingSell.Commit()
 
+	acct.AddSummaryItem("Finished " + cs.Name())
 	consoleLog.Notice(" [✔] Finished", cs.Name())
 }

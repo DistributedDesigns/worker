@@ -65,5 +65,6 @@ func (cb commitBuyCmd) Execute() {
 
 	pendingBuy.Commit()
 
+	acct.AddSummaryItem("Finished " + cb.Name())
 	consoleLog.Notice(" [✔] Finished", cb.Name())
 }
