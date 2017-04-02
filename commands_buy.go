@@ -117,6 +117,7 @@ func (b buyCmd) Execute() {
 	abortTxOnError(err, "This should be impossible!")
 	acct.pendingBuys.Push(b)
 
+	acct.AddSummaryItem("Finished " + b.Name())
 	consoleLog.Notice(" [✔] Finished", b.Name())
 }
 
@@ -125,6 +126,7 @@ func (b buyCmd) Commit() {
 	acct := accountStore[b.userID]
 	acct.Lock()
 	acct.AddStock(b.stock, b.quantityToBuy)
+	acct.AddSummaryItem("Commited " + b.Name())
 	acct.Unlock()
 }
 
@@ -133,6 +135,7 @@ func (b buyCmd) RollBack() {
 	acct := accountStore[b.userID]
 	acct.Lock()
 	acct.AddFunds(b.purchaseAmount)
+	acct.AddSummaryItem("Rolled back " + b.Name())
 	acct.Unlock()
 }
 

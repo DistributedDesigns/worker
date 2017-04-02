@@ -100,7 +100,7 @@ func (s sellCmd) Execute() {
 	quantityToSell, profit := q.Price.FitsInto(s.amount)
 	consoleLog.Debugf("Want to sell %d stock", quantityToSell)
 	if quantityToSell < 1 {
-		abortTx(s.Name() + "Cannot sell less than one stock")
+		abortTx(s.Name() + " Cannot sell less than one stock")
 	}
 
 	// If yes...
@@ -116,6 +116,7 @@ func (s sellCmd) Execute() {
 	abortTxOnError(err, s.Name())
 	acct.pendingSells.Push(s)
 
+	acct.AddSummaryItem("Finished " + s.Name())
 	consoleLog.Notice(" [✔] Finished", s.Name())
 }
 
@@ -124,6 +125,7 @@ func (s sellCmd) Commit() {
 	acct := accountStore[s.userID]
 	acct.Lock()
 	acct.AddFunds(s.profit)
+	acct.AddSummaryItem("Commited " + s.Name())
 	acct.Unlock()
 }
 
@@ -132,6 +134,7 @@ func (s sellCmd) RollBack() {
 	acct := accountStore[s.userID]
 	acct.Lock()
 	acct.AddStock(s.stock, s.quantityToSell)
+	acct.AddSummaryItem("Rolled back " + s.Name())
 	acct.Unlock()
 }
 

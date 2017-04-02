@@ -55,6 +55,8 @@ func (q quoteCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (q quoteCmd) Execute() {
+	abortTxIfNoAccount(q.userID)
+
 	qr := types.QuoteRequest{
 		Stock:      q.stock,
 		UserID:     q.userID,
@@ -64,6 +66,9 @@ func (q quoteCmd) Execute() {
 
 	// TODO: actually return a response
 	_ = getQuote(qr)
+
+	acct := accountStore[q.userID]
+	acct.AddSummaryItem("Finished " + q.Name())
 
 	consoleLog.Notice(" [✔] Finished", q.Name())
 }

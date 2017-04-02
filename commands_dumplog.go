@@ -2,10 +2,14 @@ package main
 
 import (
 	"fmt"
+	"path"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	types "github.com/distributeddesigns/shared_types"
+	"github.com/streadway/amqp"
 )
 
 type dumplogCmd struct {
@@ -35,7 +39,7 @@ func parseDumplogCmd(parts []string) dumplogCmd {
 		filename = parts[3]
 	}
 
-	return dumplogCmd{id, userID, filename}
+	return dumplogCmd{id, userID, safeFileName(filename)}
 }
 
 func (dl dumplogCmd) Name() string {
@@ -71,5 +75,51 @@ func (dl dumplogCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (dl dumplogCmd) Execute() {
-	consoleLog.Warning("Not implemented: DUMPLOG")
+	abortTxIfNoAccount(dl.userID)
+
+	dlr := types.DumplogRequest{
+		UserID:   dl.userID,
+		Filename: dl.filename,
+	}
+
+	// Optimistically send request. It's up to the user to retrieve the file~
+	ch, err := rmqConn.Channel()
+	failOnError(err, "Failed to open a channel")
+	defer ch.Close()
+
+	err = ch.Publish(
+		"",       // exchange
+		dumplogQ, // routing key
+		false,    // mandatory
+		false,    // immediate
+		amqp.Publishing{
+			ContentType: "text/csv",
+			Body:        []byte(dlr.ToCSV()),
+		})
+	failOnError(err, "Failed to publish a message")
+
+	consoleLog.Debug("Dumplog requested as", dlr.Filename)
+
+	acct := accountStore[dl.userID]
+	acct.AddSummaryItem("Finished " + dl.Name())
+
+	consoleLog.Notice(" [✔] Finished", dl.Name())
+}
+
+// Compile the file sanitization regexps once and only once
+var (
+	separators = regexp.MustCompile(`[ &_=+:]`)
+	legal      = regexp.MustCompile(`[^[:alnum:]-.]`)
+)
+
+// Convert to a string that's suitable for use as a filename.
+// Lifted from asaskevich/govalidator
+func safeFileName(str string) string {
+	name := strings.ToLower(str)
+	name = path.Clean(path.Base(name)) // "./foo/bar" -> "bar"
+	name = strings.Trim(name, " ")
+	name = separators.ReplaceAllString(name, "-")
+	name = legal.ReplaceAllString(name, "")
+	name = strings.Replace(name, "--", "-", -1)
+	return name
 }
