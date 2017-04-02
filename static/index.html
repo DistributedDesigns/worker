@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+window.onload = function () {
+    // This should occur on response 200 from login
+    var conn;
+    var msg = document.getElementById("msg");
+    var log = document.getElementById("log");
+    function appendLog(item) {
+        var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+        log.appendChild(item);
+        if (doScroll) {
+            log.scrollTop = log.scrollHeight - log.clientHeight;
+        }
+    }
+    document.getElementById("form").onsubmit = function () {
+        if (!conn) {
+            return false;
+        }
+        if (!msg.value) {
+            return false;
+        }
+        conn.send(msg.value);
+        msg.value = "";
+        return false;
+    };
+    if (window["WebSocket"]) {
+        conn = new WebSocket("ws://" + document.location.host + "/ws");
+        conn.onclose = function (evt) {
+            var item = document.createElement("div");
+            item.innerHTML = "<b>Connection closed.</b>";
+            appendLog(item);
+        };
+        conn.onmessage = function (evt) {
+            var messages = evt.data.split('\n');
+            for (var i = 0; i < messages.length; i++) {
+                var item = document.createElement("div");
+                item.innerText = messages[i];
+                appendLog(item);
+            }
+        };
+    } else {
+        var item = document.createElement("div");
+        item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+        appendLog(item);
+    }
+};
+function SendPost(command) {
+  var url = "/push";
+  var commandStr="command="
+  var theParams = commandStr + command
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", url, true);
+  //Send the proper header information along with the request
+  xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  xhr.send(theParams);
+}
+function Auth() {
+  var userID = document.getElementById("userid").value
+  var password = document.getElementById(pwd)
+  console.log("Auth")
+  console.log(userID)
+}
+function Add() {
+  var userID = document.getElementById("userid").value
+  var addamount = document.getElementById(addamount)
+  var cmd = "ADD,"+userID+","+addamount
+  SendPost(cmd)
+  console.log("Add")
+}
+function Quote() {
+  var userID = document.getElementById("userid").value
+  var stocksymbol = document.getElementById(quotestocksymbol)
+  var cmd = "QUOTE,"+userID+","+stocksymbol
+  SendPost(cmd)
+  console.log("Quote")
+}
+function Buy() {
+  var userID = document.getElementById("userid").value
+  var stocksymbol = document.getElementById(buystocksymbol)
+  var amnt = document.getElementById(buyamount)
+  var cmd = "BUY,"+userID+","+stocksymbol+","+amnt
+  SendPost(cmd)
+  console.log("Buy")
+}
+function CommitBuy() {
+  var userID = document.getElementById("userid").value
+  var cmd = "COMMIT_BUY,"+userID
+  console.log("Commit Buy")
+}
+function CancelBuy() {
+  var userID = document.getElementById("userid").value
+  var cmd = "CANCEL_BUY,"+userID
+  console.log("Cancel Buy")
+}
+function Sell() {
+  var userID = document.getElementById("userid").value
+  var stocksymbol = document.getElementById(sellstocksymbol)
+  var amnt = document.getElementById(sellamount)
+  var cmd = "SELL,"+userID+","+stocksymbol+","+amnt
+  SendPost(cmd)
+  console.log("Sell")
+}
+function CommitSell() {
+  var userID = document.getElementById("userid").value
+  var cmd = "COMMIT_SELL,"+userID
+  console.log("Commit Sell")
+}
+function CancelSell() {
+  var userID = document.getElementById("userid").value
+  var cmd = "CANCEL_SELL,"+userID
+  console.log("Cancel Sell")
+}
+function SetBuyAmount() {
+  var userID = document.getElementById("userid").value
+  var stocksymbol = document.getElementById(setbuystocksymbol)
+  var amnt = document.getElementById(setbuyamount)
+  var cmd = "SET_BUY_AMOUNT,"+userID+","+stocksymbol+","+amnt
+  SendPost(cmd)
+  console.log("Set buy amount")
+}
+function CancelSetBuy() {
+  var userID = document.getElementById("userid").value
+  var stocksymbol = document.getElementById(cancelbuystocksymbol)
+  var cmd = "CANCEL_SET_BUY,"+userID+","+stocksymbol
+  SendPost(cmd)
+  console.log("Cancel set buy")
+}
+function SetBuyTrigger() {
+  var userID = document.getElementById("userid").value
+  var stocksymbol = document.getElementById(setbuytrigstocksymbol)
+  var amnt = document.getElementById(setbuytrigamount)
+  var cmd = "SET_BUY_TRIGGER,"+userID+","+stocksymbol+","+amnt
+  SendPost(cmd)
+  console.log("Set buy trigger")
+}
+function SetSellAmount() {
+  var userID = document.getElementById("userid").value
+  var stocksymbol = document.getElementById(setsellstocksymbol)
+  var amnt = document.getElementById(setsellamount)
+  var cmd = "SET_SELL_AMOUNT,"+userID+","+stocksymbol+","+amnt
+  SendPost(cmd)
+  console.log("Set Sell Amount")
+}
+function CancelSetSell() {
+  var userID = document.getElementById("userid").value
+  var stocksymbol = document.getElementById(cancelsellstocksymbol)
+  var cmd = "CANCEL_SET_SELL,"+userID+","+stocksymbol
+  SendPost(cmd)
+  console.log("Cancel set sell")
+}
+function SetSellTrigger() {
+  var userID = document.getElementById("userid").value
+  var stocksymbol = document.getElementById(setselltrigstocksymbol)
+  var amnt = document.getElementById(setselltrigamount)
+  var cmd = "SET_SELL_TRIGGER,"+userID+","+stocksymbol+","+amnt
+  SendPost(cmd)
+  console.log("Set sell trigger")
+}
+function Dumplog() {
+  var userID = document.getElementById("userid").value
+  if(userID === "admin"){
+    SendPost("DUMPLOG,out.dump")
+    console.log("Admin Dump")
+  }
+  else
+  {
+    var fn = document.getElementById(dumplogfile)
+    var cmd = "DUMPLOG,"+userID+","+fn
+    SendPost(cmd)
+    console.log("User Dump")
+  }
+}
+function DisplaySummary() {
+  var userID = document.getElementById("userid").value
+  var cmd = "DISPLAY_SUMMARY,"+userID
+  console.log("Display summary")
+}
+</script>
+<div id="log"></div>
+<div class="container">
+    <div id="form">
+      <input type="submit" value="Send" />
+      <input type="text" id="msg" size="64"/>
+    </div>
+  <h2>Credentials:</h2>
+  <form>
+    <div class="form-group">
+      <label for="userid">User ID:</label>
+      <input type="text" class="form-control" id="userid" placeholder="Enter user ID">
+    </div>
+    <div class="form-group">
+      <label for="pwd">Password:</label>
+      <input type="password" class="form-control" id="pwd" placeholder="Enter password">
+    </div>
+    <button type="button" class="btn btn-default" onclick="Auth()">Log In</button>
+  </form>
+
+  <h2>Add:</h2>
+  <form>
+    <div class="form-group">
+      <label for="addamount">Amount:</label>
+      <input type="text" class="form-control" id="addamount" placeholder="Enter amount">
+    </div>
+    <button type="button" class="btn btn-default" onclick="Add()">Submit</button>
+  </form>
+
+  <h2>Quote:</h2>
+  <form>
+    <div class="form-group">
+      <label for="quotestocksymbol">Stock Symbol:</label>
+      <input type="text" class="form-control" id="quotestocksymbol" placeholder="Enter stock symbol">
+    </div>
+    <button type="button" class="btn btn-default" onclick="Quote()">button</button>
+  </form>
+
+  <h2>Buy:</h2>
+  <form>
+    <div class="form-group">
+      <label for="buystocksymbol">Stock Symbol:</label>
+      <input type="text" class="form-control" id="buystocksymbol" placeholder="Enter stock symbol">
+    </div>
+    <div class="form-group">
+      <label for="buyamount">Amount:</label>
+      <input type="text" class="form-control" id="buyamount" placeholder="Enter amount">
+    </div>
+    <button type="button" class="btn btn-default" onclick="Buy()">button</button>
+  </form>
+
+  <h2>Commit Buy:</h2>
+  <form>
+    <button type="button" class="btn btn-default" onclick="CommitBuy()">button</button>
+  </form>
+
+  <h2>Cancel Buy:</h2>
+  <form>
+    <button type="button" class="btn btn-default">button</button>
+  </form>
+
+  <h2>Sell:</h2>
+  <form>
+    <div class="form-group">
+      <label for="sellstocksymbol">Stock Symbol:</label>
+      <input type="text" class="form-control" id="sellstocksymbol" placeholder="Enter stock symbol">
+    </div>
+    <div class="form-group">
+      <label for="sellamount">Amount:</label>
+      <input type="text" class="form-control" id="sellamount" placeholder="Enter amount">
+    </div>
+    <button type="button" class="btn btn-default">button</button>
+  </form>
+
+  <h2>Commit Sell:</h2>
+  <form>
+    <button type="button" class="btn btn-default">button</button>
+  </form>
+
+  <h2>Cancel Sell:</h2>
+  <form>
+    <button type="button" class="btn btn-default">button</button>
+  </form>
+
+  <h2>Set Buy Amount:</h2>
+  <form>
+    <div class="form-group">
+      <label for="setbuystocksymbol">Stock Symbol:</label>
+      <input type="text" class="form-control" id="setbuystocksymbol" placeholder="Enter stock symbol">
+    </div>
+    <div class="form-group">
+      <label for="setbuyamount">Amount:</label>
+      <input type="text" class="form-control" id="setbuyamount" placeholder="Enter amount">
+    </div>
+    <button type="button" class="btn btn-default">button</button>
+  </form>
+
+  <h2>Cancel Set Buy:</h2>
+  <form>
+    <div class="form-group">
+      <label for="cancelbuystocksymbol">Stock Symbol:</label>
+      <input type="text" class="form-control" id="cancelbuystocksymbol" placeholder="Enter stock symbol">
+    </div>
+    <button type="button" class="btn btn-default">button</button>
+  </form>
+
+  <h2>Set Buy Trigger:</h2>
+  <form>
+    <div class="form-group">
+      <label for="setbuytrigstocksymbol">Stock Symbol:</label>
+      <input type="text" class="form-control" id="setbuytrigstocksymbol" placeholder="Enter stock symbol">
+    </div>
+    <div class="form-group">
+      <label for="setbuytrigamount">Amount:</label>
+      <input type="text" class="form-control" id="setbuytrigamount" placeholder="Enter amount">
+    </div>
+    <button type="button" class="btn btn-default">button</button>
+  </form>
+
+  <h2>Set Sell Amount:</h2>
+  <form>
+    <div class="form-group">
+      <label for="setsellstocksymbol">Stock Symbol:</label>
+      <input type="text" class="form-control" id="setsellstocksymbol" placeholder="Enter stock symbol">
+    </div>
+    <div class="form-group">
+      <label for="setsellamount">Amount:</label>
+      <input type="text" class="form-control" id="setsellamount" placeholder="Enter amount">
+    </div>
+    <button type="button" class="btn btn-default">button</button>
+  </form>
+
+  <h2>Cancel Set Sell:</h2>
+  <form>
+    <div class="form-group">
+      <label for="cancelsellstocksymbol">Stock Symbol:</label>
+      <input type="text" class="form-control" id="cancelsellstocksymbol" placeholder="Enter stock symbol">
+    </div>
+    <button type="button" class="btn btn-default">button</button>
+  </form>
+
+  <h2>Set Sell Trigger:</h2>
+  <form>
+    <div class="form-group">
+      <label for="setselltrigstocksymbol">Stock Symbol:</label>
+      <input type="text" class="form-control" id="setselltrigstocksymbol" placeholder="Enter stock symbol">
+    </div>
+    <div class="form-group">
+      <label for="setselltrigamount">Amount:</label>
+      <input type="text" class="form-control" id="setselltrigamount" placeholder="Enter amount">
+    </div>
+    <button type="button" class="btn btn-default">button</button>
+  </form>
+
+  <h2>Dumplog:</h2>
+  <form>
+    <div class="form-group">
+      <label for="dumplogfile">Amount:</label>
+      <input type="text" class="form-control" id="dumplogfile" placeholder="Enter file name">
+    </div>
+    <button type="button" class="btn btn-default">button</button>
+  </form>
+
+  <h2>Display Summary:</h2>
+  <form>
+    <button type="button" class="btn btn-default">button</button>
+  </form>
+
+
+</div>
+</body>
+</html>

@@ -3,20 +3,24 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/garyburd/redigo/redis"
+	"github.com/gorilla/websocket"
 )
 
 type commandStruct struct {
 	Command string
 }
 
+var userAuthStore = make(map[string]string)
+
 var conn redis.Conn
 
 var reqCounter uint64
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func pushHandler(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	cmd := struct{ Command string }{""}
@@ -29,10 +33,72 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	redisCmd := fmt.Sprintf("[%d] %s\n", reqCounter, cmd.Command)
 	_, err = conn.Do("RPUSH", pendingTxKey, redisCmd)
 
-	failOnError(err, "Failed to push to worker queue")
+	failOnError(err, "Failed to push to worker queue") // This will result in requests hanging
+	if err != nil {
+		// Apparently err is nil even on good pushes. #ThanksRedis
+		fmt.Fprintf(w, "Action %s was not completed.", cmd.Command)
+		return
+	}
 	reqCounter++
-	responseText := fmt.Sprintf("Successfully performed %s\n", cmd.Command)
-	fmt.Fprintf(w, responseText, r.URL.Path[1:])
+	fmt.Fprintf(w, "Successfully performed %s\n", cmd.Command)
+}
+
+func authHandler(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+
+	cmd := struct {
+		Pass string
+		User string
+	}{"", ""}
+	err := decoder.Decode(&cmd)
+	failOnError(err, "Failed to decode request")
+	pass, found := userAuthStore[cmd.User]
+	if !found {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "User %s does not exist", cmd.User) // SET THE RIGHT STATUS CODES!
+		return
+	}
+	if pass != cmd.Pass {
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Fprintf(w, "Password for User %s is incorrect", cmd.User)
+		return
+	}
+	fmt.Fprintf(w, "User %s successfully logged in", cmd.User)
+}
+
+func createHandler(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+
+	cmd := struct {
+		Pass string
+		User string
+	}{"", ""}
+	err := decoder.Decode(&cmd)
+
+	failOnError(err, "Decoding Failed")
+	_, found := userAuthStore[cmd.User]
+	if found {
+		// user already exists
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "User %s already exists", cmd.User)
+		return
+	}
+	userAuthStore[cmd.User] = cmd.Pass
+	fmt.Fprint(w, "Success")
+}
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+
+func wsHandler(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	conn.WriteMessage(websocket.TextMessage, []byte("Hello"))
 }
 
 func incomingTxWatcher() {
@@ -40,6 +106,10 @@ func incomingTxWatcher() {
 	conn = redisPool.Get()
 	port := fmt.Sprintf(":%d", config.Redis.Port+*workerNum)
 	fmt.Printf("Started watching on port %s\n", port)
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/push", pushHandler)
+	http.HandleFunc("/auth", authHandler)
+	http.HandleFunc("/create", createHandler)
+	http.HandleFunc("/ws", wsHandler)
+	http.Handle("/", http.FileServer(http.Dir("./static")))
 	http.ListenAndServe(port, nil)
 }
