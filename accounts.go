@@ -128,13 +128,22 @@ func (ac *account) AddSummaryItem(s string) {
 // GetSummary returns a list of the user's most recent account activities,
 // sorted newest to oldest
 func (ac *account) GetSummary() []summaryItem {
-	s := make([]summaryItem, 0)
+	s := make([]summaryItem, summarySize)
 
+	// Track non-nil items added
+	var i int
 	ac.summary.Do(func(node interface{}) {
 		if node != nil {
-			s = append(s, node.(summaryItem))
+			s[i] = node.(summaryItem)
+			i++
 		}
 	})
+
+	// If we didn't fill the return slice only send back the non-nil items.
+	// Complaint: shrinking slices in Go is D:
+	if i < summarySize {
+		return s[:i]
+	}
 
 	return s
 }
