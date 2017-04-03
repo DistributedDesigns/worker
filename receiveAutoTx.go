@@ -68,10 +68,10 @@ func receiveAutoTx() {
 
 	for d := range msgs {
 		//fmt.Printf("Response Received\n")
-		autoTx, err := types.ParseAutoTxFilled(string(d.Body[:]))
+		autoTxFilled, err := types.ParseAutoTxFilled(string(d.Body[:]))
 		failOnError(err, "Failed to parse autoTxInit")
-		consoleLog.Debugf("AutoTxFilled is : %+v\n", autoTx)
-		// do account add and lock here, needs rebase
+		consoleLog.Debugf("AutoTxFilled is : %+v\n", autoTxFilled)
+		fulfilAutoTx(autoTxFilled)
 	}
 
 	// failOnError(err, "Failed to consume from quoteBroadcast Channel")

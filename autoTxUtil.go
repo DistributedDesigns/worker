@@ -5,6 +5,11 @@ import (
 	"github.com/streadway/amqp"
 )
 
+func fulfilAutoTx(autoTxFilled types.AutoTxFilled) {
+	// do account add and lock here, needs rebase
+	return
+}
+
 func rmqPush(ch *amqp.Channel, header string, body string) {
 	err := ch.Publish(
 		"",          // exchange
@@ -28,6 +33,9 @@ func sendAutoTxInit(autoTxInitChan <-chan types.AutoTxInit) {
 	for {
 		message := <-autoTxInitChan
 		//TODO: check localquotecache. If we can fill it, don't even bother sending it.
+		// if quoteCache hit and val < or > trigger
+		// 		fulfillAutoTx(types.AutoTxFilled{})
+		//		continue
 		rmqPush(ch, "autoTxInit", message.ToCSV())
 	}
 }
@@ -39,6 +47,9 @@ func sendAutoTxCancel(autoTxCancelChan <-chan types.AutoTxKey) {
 	for {
 		message := <-autoTxCancelChan
 		//TODO: check localquotecache. If we can fill it, don't even bother sending it.
+		// if quoteCache hit and val < or > trigger
+		// 		fulfillAutoTx(types.AutoTxFilled{})
+		//		continue
 		rmqPush(ch, "autoTxCancel", message.ToCSV())
 	}
 }
