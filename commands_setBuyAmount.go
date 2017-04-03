@@ -79,4 +79,5 @@ func (sba setBuyAmountCmd) Execute() {
 		Amount:    sba.amount,
 		WorkerID:  *workerNum,
 	}
+	consoleLog.Notice(" [✔] Finished", sba.Name())
 }

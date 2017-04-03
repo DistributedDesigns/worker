@@ -63,4 +63,5 @@ func (css cancelSetSellCmd) Execute() {
 	delete(workATXStore, autoTxKey)
 	autoTxCancelChan <- autoTxKey
 	consoleLog.Debugf("Published aTx %v successfully", autoTxKey)
+	consoleLog.Notice(" [✔] Finished", css.Name())
 }

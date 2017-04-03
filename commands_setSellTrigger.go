@@ -79,4 +79,5 @@ func (sst setSellTriggerCmd) Execute() {
 	autoTx.Trigger = sst.amount
 	autoTxInitChan <- autoTx
 	consoleLog.Debugf("Published aTx %v successfully", autoTx)
+	consoleLog.Notice(" [✔] Finished", sst.Name())
 }

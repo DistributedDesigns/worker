@@ -79,4 +79,5 @@ func (sbt setBuyTriggerCmd) Execute() {
 	autoTx.Trigger = sbt.amount
 	autoTxInitChan <- autoTx
 	consoleLog.Debugf("Published aTx %v successfully", autoTx)
+	consoleLog.Notice(" [✔] Finished", sbt.Name())
 }

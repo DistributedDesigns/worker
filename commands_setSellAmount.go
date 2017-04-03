@@ -79,4 +79,5 @@ func (ssa setSellAmountCmd) Execute() {
 		Amount:    ssa.amount,
 		WorkerID:  *workerNum,
 	}
+	consoleLog.Notice(" [✔] Finished", ssa.Name())
 }
