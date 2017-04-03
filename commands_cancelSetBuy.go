@@ -55,5 +55,13 @@ func (csb cancelSetBuyCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (csb cancelSetBuyCmd) Execute() {
-	consoleLog.Warning("Not implemented: CANCEL_SET_BUY")
+	autoTxKey := types.AutoTxKey{
+		Stock:  csb.stock,
+		UserID: csb.userID,
+		Action: "Buy",
+	}
+	delete(workATXStore, autoTxKey)
+	autoTxCancelChan <- autoTxKey
+	consoleLog.Debugf("Published aTx %v successfully", autoTxKey)
+	consoleLog.Notice(" [✔] Finished", csb.Name())
 }

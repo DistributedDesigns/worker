@@ -63,5 +63,21 @@ func (ssa setSellAmountCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (ssa setSellAmountCmd) Execute() {
-	consoleLog.Warning("Not implemented: SET_SELL_AMOUNT")
+	autoTxKey := types.AutoTxKey{
+		Stock:  ssa.stock,
+		UserID: ssa.userID,
+		Action: "Sell",
+	}
+	_, found := workATXStore[autoTxKey]
+	if found {
+		// autoTx already exists, we'll need to cancel it.
+		autoTxCancelChan <- autoTxKey
+	}
+
+	workATXStore[autoTxKey] = types.AutoTxInit{
+		AutoTxKey: autoTxKey,
+		Amount:    ssa.amount,
+		WorkerID:  *workerNum,
+	}
+	consoleLog.Notice(" [✔] Finished", ssa.Name())
 }
