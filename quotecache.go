@@ -118,6 +118,14 @@ func getQuoteKey(stock string) string {
 	return redisBaseKey + ":quotes:" + stock
 }
 
+func hasQuote(qr types.QuoteRequest) bool {
+	conn := redisPool.Get()
+	defer conn.Close()
+	quoteKey := getQuoteKey(qr.Stock)
+	_, err := redis.String(conn.Do("GET", quoteKey))
+	return err != redis.ErrNil
+}
+
 // getQuote checks local redis for a quote
 func getQuote(qr types.QuoteRequest) types.Quote {
 	conn := redisPool.Get()

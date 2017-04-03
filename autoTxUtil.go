@@ -1,29 +1,50 @@
 package main
 
 import (
+	"github.com/distributeddesigns/currency"
 	types "github.com/distributeddesigns/shared_types"
 	"github.com/streadway/amqp"
 )
 
-func fulfilAutoTx(autoTxFilled types.AutoTxFilled) {
-	// do account add and lock here, needs rebase
+func updateAccount(autoTxFilled types.AutoTxFilled) {
+	// TODO: Do account add and lock here, needs rebase
 	return
 }
 
-func rmqPush(ch *amqp.Channel, header string, body string) {
-	err := ch.Publish(
-		"",          // exchange
-		autoTxQueue, // routing key
-		false,       // mandatory
-		false,       // immediate
-		amqp.Publishing{
-			ContentType: "text/csv",
-			Headers: amqp.Table{
-				"transType": header,
-			},
-			Body: []byte(body),
-		})
-	failOnError(err, "Failed to publish a message")
+func fulfillAutoTx(autoTxKey types.AutoTxKey, ch *amqp.Channel, header string, body string) {
+	qr := types.QuoteRequest{
+		Stock:      autoTxKey.Stock,
+		UserID:     autoTxKey.UserID,
+		AllowCache: true,
+		ID:         ^uint64(0),
+	}
+	found := hasQuote(qr)
+	if !found {
+		// No quote found, let's autoTx that
+		err := ch.Publish(
+			"",          // exchange
+			autoTxQueue, // routing key
+			false,       // mandatory
+			false,       // immediate
+			amqp.Publishing{
+				ContentType: "text/csv",
+				Headers: amqp.Table{
+					"transType": header,
+				},
+				Body: []byte(body),
+			})
+		failOnError(err, "Failed to publish a message")
+		return
+	}
+	// TODO: DO MATH FOR FILLED TRANS
+	curr, err := currency.NewFromFloat(0.00)
+	failOnError(err, "Failed to parse currency")
+	autoTxFilled := types.AutoTxFilled{
+		AddFunds:  curr,
+		AddStocks: uint(0),
+		AutoTxKey: autoTxKey,
+	}
+	updateAccount(autoTxFilled)
 }
 
 func sendAutoTxInit(autoTxInitChan <-chan types.AutoTxInit) {
@@ -31,12 +52,9 @@ func sendAutoTxInit(autoTxInitChan <-chan types.AutoTxInit) {
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
 	for {
-		message := <-autoTxInitChan
-		//TODO: check localquotecache. If we can fill it, don't even bother sending it.
-		// if quoteCache hit and val < or > trigger
-		// 		fulfillAutoTx(types.AutoTxFilled{})
-		//		continue
-		rmqPush(ch, "autoTxInit", message.ToCSV())
+		autoTxInit := <-autoTxInitChan
+		autoTxKey := autoTxInit.AutoTxKey
+		fulfillAutoTx(autoTxKey, ch, "autoTxInit", autoTxInit.ToCSV())
 	}
 }
 
@@ -45,11 +63,7 @@ func sendAutoTxCancel(autoTxCancelChan <-chan types.AutoTxKey) {
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
 	for {
-		message := <-autoTxCancelChan
-		//TODO: check localquotecache. If we can fill it, don't even bother sending it.
-		// if quoteCache hit and val < or > trigger
-		// 		fulfillAutoTx(types.AutoTxFilled{})
-		//		continue
-		rmqPush(ch, "autoTxCancel", message.ToCSV())
+		autoTxKey := <-autoTxCancelChan
+		fulfillAutoTx(autoTxKey, ch, "autoTxCancel", autoTxKey.ToCSV())
 	}
 }
