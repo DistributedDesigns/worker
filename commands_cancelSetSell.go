@@ -55,5 +55,13 @@ func (css cancelSetSellCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (css cancelSetSellCmd) Execute() {
-	consoleLog.Warning("Not implemented: CANCEL_SET_SELL")
+	autoTxKey := types.AutoTxKey{
+		Stock:  css.stock,
+		UserID: css.userID,
+		Action: "Sell",
+	}
+	delete(workATXStore, autoTxKey)
+	autoTxCancelChan <- autoTxKey
+	consoleLog.Debugf("Published aTx %v successfully", autoTxKey)
+	consoleLog.Notice(" [✔] Finished", css.Name())
 }
