@@ -19,3 +19,4 @@ quote policy:
   use in buy sell: 3
 
 cleanup interval: 60
+websocket port: 44433

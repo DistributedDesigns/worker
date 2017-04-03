@@ -16,7 +16,7 @@ type commandStruct struct {
 
 var userAuthStore = make(map[string]string)
 
-var conn redis.Conn
+var txWatcherRedisConn redis.Conn
 
 var reqCounter uint64
 
@@ -31,7 +31,7 @@ func pushHandler(w http.ResponseWriter, r *http.Request) {
 	//Validate Command
 	//Add it to Redis
 	redisCmd := fmt.Sprintf("[%d] %s\n", reqCounter, cmd.Command)
-	_, err = conn.Do("RPUSH", pendingTxKey, redisCmd)
+	_, err = txWatcherRedisConn.Do("RPUSH", pendingTxKey, redisCmd)
 
 	failOnError(err, "Failed to push to worker queue") // This will result in requests hanging
 	if err != nil {
@@ -125,8 +125,8 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 
 func incomingTxWatcher() {
 
-	conn = redisPool.Get()
-	port := fmt.Sprintf(":%d", config.Redis.Port+*workerNum)
+	txWatcherRedisConn = redisPool.Get()
+	port := fmt.Sprintf(":%d", config.WebSocketPort)
 	fmt.Printf("Started watching on port %s\n", port)
 	http.HandleFunc("/push", pushHandler)
 	http.HandleFunc("/auth", authHandler)

@@ -26,3 +26,5 @@ quote policy:
 # How often user accounts will be crawled for removal of expired
 # pending buy / sells
 cleanup interval: 60 # seconda
+
+websocket port: 44433
