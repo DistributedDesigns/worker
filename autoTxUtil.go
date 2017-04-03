@@ -27,6 +27,7 @@ func sendAutoTxInit(autoTxInitChan <-chan types.AutoTxInit) {
 	defer ch.Close()
 	for {
 		message := <-autoTxInitChan
+		//TODO: check localquotecache. If we can fill it, don't even bother sending it.
 		rmqPush(ch, "autoTxInit", message.ToCSV())
 	}
 }
@@ -37,6 +38,7 @@ func sendAutoTxCancel(autoTxCancelChan <-chan types.AutoTxKey) {
 	defer ch.Close()
 	for {
 		message := <-autoTxCancelChan
+		//TODO: check localquotecache. If we can fill it, don't even bother sending it.
 		rmqPush(ch, "autoTxCancel", message.ToCSV())
 	}
 }

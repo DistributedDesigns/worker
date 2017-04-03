@@ -79,5 +79,4 @@ func (ssa setSellAmountCmd) Execute() {
 		Amount:    ssa.amount,
 		WorkerID:  *workerNum,
 	}
-	autoTxInitChan <- workATXStore[autoTxKey]
 }
