@@ -113,18 +113,18 @@ func (ac *account) PruneExpiredTxs() {
 	ac.AddSummaryItem("Finished expired TX cleanup")
 }
 
-type summaryItem struct {
-	loggedAt time.Time
-	message  string
-}
-
-func (ac *account) PushEvent(user string, message string) {
-	socket, found := userSocketmap[user]
+func (ac *account) PushEvent(message string) {
+	socket, found := userSocketmap[ac.userID]
 	if !found {
-		consoleLog.Debugf("User %s is not subscribed to a socket connection", user)
+		consoleLog.Errorf("User %s is not subscribed to a socket connection", ac.userID)
 		return
 	}
 	socket.WriteMessage(websocket.TextMessage, []byte(message))
+}
+
+type summaryItem struct {
+	loggedAt time.Time
+	message  string
 }
 
 func (ac *account) AddSummaryItem(s string) {
@@ -133,6 +133,8 @@ func (ac *account) AddSummaryItem(s string) {
 	// we convert the ring to a slice.
 	ac.summary = ac.summary.Prev()
 	ac.summary.Value = summaryItem{time.Now(), s}
+
+	ac.PushEvent(s)
 }
 
 // GetSummary returns a list of the user's most recent account activities,
