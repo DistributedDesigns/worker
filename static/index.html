@@ -10,53 +10,53 @@
 </head>
 <body>
 <script type="text/javascript">
-window.onload = function () {
-    // This should occur on response 200 from login
-    var conn;
-    var msg = document.getElementById("msg");
-    var log = document.getElementById("log");
-    function appendLog(item) {
-        var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
-        log.appendChild(item);
-        if (doScroll) {
-            log.scrollTop = log.scrollHeight - log.clientHeight;
-        }
-    }
-    document.getElementById("form").onsubmit = function () {
-        if (!conn) {
-            return false;
-        }
-        if (!msg.value) {
-            return false;
-        }
-        conn.send(msg.value);
-        msg.value = "";
-        return false;
-    };
-    if (window["WebSocket"]) {
-        conn = new WebSocket("ws://" + document.location.host + "/ws");
-        conn.onopen = function (evt) {
-          conn.send("Bob")
-        }
-        conn.onclose = function (evt) {
-            var item = document.createElement("div");
-            item.innerHTML = "<b>Connection closed.</b>";
-            appendLog(item);
-        };
-        conn.onmessage = function (evt) {
-            var messages = evt.data.split('\n');
-            for (var i = 0; i < messages.length; i++) {
-                var item = document.createElement("div");
-                item.innerText = messages[i];
-                appendLog(item);
-            }
-        };
-    } else {
-        var item = document.createElement("div");
-        item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
-        appendLog(item);
-    }
-};
+// window.onload = function () {
+//     // This should occur on response 200 from login
+//     var conn;
+//     var msg = document.getElementById("msg");
+//     var log = document.getElementById("log");
+//     function appendLog(item) {
+//         var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+//         log.appendChild(item);
+//         if (doScroll) {
+//             log.scrollTop = log.scrollHeight - log.clientHeight;
+//         }
+//     }
+//     document.getElementById("form").onsubmit = function () {
+//         if (!conn) {
+//             return false;
+//         }
+//         if (!msg.value) {
+//             return false;
+//         }
+//         conn.send(msg.value);
+//         msg.value = "";
+//         return false;
+//     };
+//     if (window["WebSocket"]) {
+//         conn = new WebSocket("ws://" + document.location.host + "/ws");
+//         conn.onopen = function (evt) {
+//           conn.send("Bob")
+//         }
+//         conn.onclose = function (evt) {
+//             var item = document.createElement("div");
+//             item.innerHTML = "<b>Connection closed.</b>";
+//             appendLog(item);
+//         };
+//         conn.onmessage = function (evt) {
+//             var messages = evt.data.split('\n');
+//             for (var i = 0; i < messages.length; i++) {
+//                 var item = document.createElement("div");
+//                 item.innerText = messages[i];
+//                 appendLog(item);
+//             }
+//         };
+//     } else {
+//         var item = document.createElement("div");
+//         item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+//         appendLog(item);
+//     }
+// };
 function SendPost(command) {
   var url = "/push";
   var commandStr="command="
@@ -68,9 +68,54 @@ function SendPost(command) {
   xhr.send(theParams);
 }
 function doAuth(rawData) {
-  localStorage["user"] = document.getElementById("userid").value
+  localStorage["user"] = localStorage["user"] || document.getElementById("userid").value
   document.getElementById('loginview').style.display = 'none';
   document.getElementById('authview').style.display = 'block';
+  var conn;
+  var msg = document.getElementById("msg");
+  var log = document.getElementById("log");
+  function appendLog(item) {
+      var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+      log.appendChild(item);
+      if (doScroll) {
+          log.scrollTop = log.scrollHeight - log.clientHeight;
+      }
+  }
+  document.getElementById("form").onsubmit = function () {
+      if (!conn) {
+          return false;
+      }
+      if (!msg.value) {
+          return false;
+      }
+      conn.send(msg.value);
+      msg.value = "";
+      return false;
+  };
+  if (window["WebSocket"]) {
+      conn = new WebSocket("ws://" + document.location.host + "/ws");
+      conn.onopen = function (evt) {
+        console.log("CON OPEN")
+        conn.send(localStorage["user"])
+      }
+      conn.onclose = function (evt) {
+          var item = document.createElement("div");
+          item.innerHTML = "<b>Connection closed.</b>";
+          appendLog(item);
+      };
+      conn.onmessage = function (evt) {
+          var messages = evt.data.split('\n');
+          for (var i = 0; i < messages.length; i++) {
+              var item = document.createElement("div");
+              item.innerText = messages[i];
+              appendLog(item);
+          }
+      };
+  } else {
+      var item = document.createElement("div");
+      item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+      appendLog(item);
+  }
   console.log("Auth Successful")
 }
 function Auth() {
@@ -411,6 +456,7 @@ function DisplaySummary() {
 if (localStorage["user"]) {
   document.getElementById('loginview').style.display = 'none';
   document.getElementById('authview').style.display = 'block';
+  doAuth()
 } else {
   document.getElementById('loginview').style.display = 'block';
   document.getElementById('authview').style.display = 'none';
