@@ -256,7 +256,7 @@ function DisplaySummary() {
 }
 </script>
 <div id="container" style="float: left; width: 30%; margin: 5px 20px;">
-  <form id="loginview">
+  <form id="loginview" style="display: none;">
     <h2>Credentials:</h2>
     <div class="form-group">
       <label for="userid">User ID:</label>
@@ -269,7 +269,7 @@ function DisplaySummary() {
     <button type="button" class="btn btn-default" onclick="Create()">Create</button>
     <button type="button" class="btn btn-default" onclick="Auth()">Log In</button>
   </form>
-  <div id="authview">
+  <div id="authview" style="display: none;">
     <div class="container" style="display: none;">
         <div id="form">
           <input type="submit" value="Send" />
