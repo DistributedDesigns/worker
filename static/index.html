@@ -70,27 +70,6 @@ function appendLog(item) {
     var log = document.getElementById("log");
     var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
     log.appendChild(item);
-    if (doScroll) {
-        log.scrollTop = log.scrollHeight - log.clientHeight;
-    }
-  // xhr.onload = function() {
-  //   if (request.status >= 200 && request.status < 400) {
-  //     // Success!
-  //     // var data = request.responseText;
-  //     // console.log(data)
-  //     doAuth(request.responseText)
-  //   } else {
-  //     // We reached our target server, but it returned an error
-  //     console.log("Failed to Auth user")
-  //   }
-  // };
-
-  // request.onerror = function() {
-  //   // There was a connection error of some sort
-  // };
-  var jsonPayload = JSON.stringify({command: theCommand})
-  request.send(jsonPayload);
-
 }
 
 function doAuth(rawData) {
@@ -99,17 +78,6 @@ function doAuth(rawData) {
   document.getElementById('authview').style.display = 'block';
   var conn;
   var msg = document.getElementById("msg");
-  document.getElementById("form").onsubmit = function () {
-      if (!conn) {
-          return false;
-      }
-      if (!msg.value) {
-          return false;
-      }
-      conn.send(msg.value);
-      msg.value = "";
-      return false;
-  };
   if (window["WebSocket"]) {
       conn = new WebSocket("ws://" + document.location.host + "/ws");
       conn.onopen = function (evt) {
@@ -181,6 +149,10 @@ function Create() {
   };
 
   request.send(JSON.stringify({user: document.getElementById("userid").value, pass: document.getElementById("pwd").value}));
+}
+function Logout() {
+  localStorage.clear()
+  location.reload()
 }
 function Add() {
   SendPost("ADD,"+localStorage["user"]+","+document.getElementById("addamount").value)
@@ -255,179 +227,181 @@ function DisplaySummary() {
   console.log("Display summary")
 }
 </script>
-<div id="container" style="float: left; width: 30%; margin: 5px 20px;">
-  <form id="loginview" style="display: none;">
+<div id="container">
+  <form id="loginview" style="display: none; margin: 5px 20px;">
     <h2>Credentials:</h2>
     <div class="form-group">
       <label for="userid">User ID:</label>
-      <input type="text" class="form-control" id="userid" placeholder="Enter user ID">
+      <input type="text" class="form-control" id="userid" placeholder="Enter user ID" style="width: 200px">
     </div>
     <div class="form-group">
       <label for="pwd">Password:</label>
-      <input type="password" class="form-control" id="pwd" placeholder="Enter password">
+      <input type="password" class="form-control" id="pwd" placeholder="Enter password" style="width: 200px">
     </div>
     <button type="button" class="btn btn-default" onclick="Create()">Create</button>
     <button type="button" class="btn btn-default" onclick="Auth()">Log In</button>
   </form>
   <div id="authview" style="display: none;">
-    <div class="container" style="display: none;">
-        <div id="form">
-          <input type="submit" value="Send" />
-          <input type="text" id="msg" size="64"/>
+    <div style="float: left; width: 30%; margin: 5px 20px;">
+
+      <h2>Logout:</h2>
+      <form>
+        <button type="button" class="btn btn-default" onclick="Logout()">Logout</button>
+      </form>
+
+      <h2>Add:</h2>
+      <form>
+        <div class="form-group">
+          <label for="addamount">Amount:</label>
+          <input type="text" class="form-control" id="addamount" placeholder="Enter amount">
         </div>
+        <button type="button" class="btn btn-default" onclick="Add()">Submit</button>
+      </form>
+
+      <h2>Quote:</h2>
+      <form>
+        <div class="form-group">
+          <label for="quotestocksymbol">Stock Symbol:</label>
+          <input type="text" class="form-control" id="quotestocksymbol" placeholder="Enter stock symbol">
+        </div>
+        <button type="button" class="btn btn-default" onclick="Quote()">Submit</button>
+      </form>
+
+      <h2>Buy:</h2>
+      <form>
+        <div class="form-group">
+          <label for="buystocksymbol">Stock Symbol:</label>
+          <input type="text" class="form-control" id="buystocksymbol" placeholder="Enter stock symbol">
+        </div>
+        <div class="form-group">
+          <label for="buyamount">Amount:</label>
+          <input type="text" class="form-control" id="buyamount" placeholder="Enter amount">
+        </div>
+        <button type="button" class="btn btn-default" onclick="Buy()">Submit</button>
+      </form>
+
+      <h2>Commit Buy:</h2>
+      <form>
+        <button type="button" class="btn btn-default" onclick="CommitBuy()">Submit</button>
+      </form>
+
+      <h2>Cancel Buy:</h2>
+      <form>
+        <button type="button" class="btn btn-default" onclick="CancelBuy()">Submit</button>
+      </form>
+
+      <h2>Sell:</h2>
+      <form>
+        <div class="form-group">
+          <label for="sellstocksymbol">Stock Symbol:</label>
+          <input type="text" class="form-control" id="sellstocksymbol" placeholder="Enter stock symbol">
+        </div>
+        <div class="form-group">
+          <label for="sellamount">Amount:</label>
+          <input type="text" class="form-control" id="sellamount" placeholder="Enter amount">
+        </div>
+        <button type="button" class="btn btn-default" onclick="Sell()">Submit</button>
+      </form>
+
+      <h2>Commit Sell:</h2>
+      <form>
+        <button type="button" class="btn btn-default" onclick="CommitSell()">Submit</button>
+      </form>
+
+      <h2>Cancel Sell:</h2>
+      <form>
+        <button type="button" class="btn btn-default" onclick="CancelSell()">Submit</button>
+      </form>
+
+      <h2>Set Buy Amount:</h2>
+      <form>
+        <div class="form-group">
+          <label for="setbuystocksymbol">Stock Symbol:</label>
+          <input type="text" class="form-control" id="setbuystocksymbol" placeholder="Enter stock symbol">
+        </div>
+        <div class="form-group">
+          <label for="setbuyamount">Amount:</label>
+          <input type="text" class="form-control" id="setbuyamount" placeholder="Enter amount">
+        </div>
+        <button type="button" class="btn btn-default" onclick="SetBuyAmount()">Submit</button>
+      </form>
+
+      <h2>Cancel Set Buy:</h2>
+      <form>
+        <div class="form-group">
+          <label for="cancelbuystocksymbol">Stock Symbol:</label>
+          <input type="text" class="form-control" id="cancelbuystocksymbol" placeholder="Enter stock symbol">
+        </div>
+        <button type="button" class="btn btn-default" onclick="CancelSetBuy()">Submit</button>
+      </form>
+
+      <h2>Set Buy Trigger:</h2>
+      <form>
+        <div class="form-group">
+          <label for="setbuytrigstocksymbol">Stock Symbol:</label>
+          <input type="text" class="form-control" id="setbuytrigstocksymbol" placeholder="Enter stock symbol">
+        </div>
+        <div class="form-group">
+          <label for="setbuytrigamount">Amount:</label>
+          <input type="text" class="form-control" id="setbuytrigamount" placeholder="Enter amount">
+        </div>
+        <button type="button" class="btn btn-default" onclick="SetBuyTrigger()">Submit</button>
+      </form>
+
+      <h2>Set Sell Amount:</h2>
+      <form>
+        <div class="form-group">
+          <label for="setsellstocksymbol">Stock Symbol:</label>
+          <input type="text" class="form-control" id="setsellstocksymbol" placeholder="Enter stock symbol">
+        </div>
+        <div class="form-group">
+          <label for="setsellamount">Amount:</label>
+          <input type="text" class="form-control" id="setsellamount" placeholder="Enter amount">
+        </div>
+        <button type="button" class="btn btn-default" onclick="SetSellAmount()">Submit</button>
+      </form>
+
+      <h2>Cancel Set Sell:</h2>
+      <form>
+        <div class="form-group">
+          <label for="cancelsellstocksymbol">Stock Symbol:</label>
+          <input type="text" class="form-control" id="cancelsellstocksymbol" placeholder="Enter stock symbol">
+        </div>
+        <button type="button" class="btn btn-default" onclick="CancelSetSell()">Submit</button>
+      </form>
+
+      <h2>Set Sell Trigger:</h2>
+      <form>
+        <div class="form-group">
+          <label for="setselltrigstocksymbol">Stock Symbol:</label>
+          <input type="text" class="form-control" id="setselltrigstocksymbol" placeholder="Enter stock symbol">
+        </div>
+        <div class="form-group">
+          <label for="setselltrigamount">Amount:</label>
+          <input type="text" class="form-control" id="setselltrigamount" placeholder="Enter amount">
+        </div>
+        <button type="button" class="btn btn-default" onclick="SetSellTrigger()">Submit</button>
+      </form>
+
+      <h2>Dumplog:</h2>
+      <form>
+        <div class="form-group">
+          <label for="dumplogfile">Amount:</label>
+          <input type="text" class="form-control" id="dumplogfile" placeholder="Enter file name">
+        </div>
+        <button type="button" class="btn btn-default" onclick="Dumplog()">Submit</button>
+      </form>
+
+      <h2>Display Summary:</h2>
+      <form>
+        <button type="button" class="btn btn-default" onclick="DisplaySummary()">Submit</button>
+      </form>
     </div>
-    <h2>Add:</h2>
-    <form>
-      <div class="form-group">
-        <label for="addamount">Amount:</label>
-        <input type="text" class="form-control" id="addamount" placeholder="Enter amount">
-      </div>
-      <button type="button" class="btn btn-default" onclick="Add()">Submit</button>
-    </form>
-
-    <h2>Quote:</h2>
-    <form>
-      <div class="form-group">
-        <label for="quotestocksymbol">Stock Symbol:</label>
-        <input type="text" class="form-control" id="quotestocksymbol" placeholder="Enter stock symbol">
-      </div>
-      <button type="button" class="btn btn-default" onclick="Quote()">Submit</button>
-    </form>
-
-    <h2>Buy:</h2>
-    <form>
-      <div class="form-group">
-        <label for="buystocksymbol">Stock Symbol:</label>
-        <input type="text" class="form-control" id="buystocksymbol" placeholder="Enter stock symbol">
-      </div>
-      <div class="form-group">
-        <label for="buyamount">Amount:</label>
-        <input type="text" class="form-control" id="buyamount" placeholder="Enter amount">
-      </div>
-      <button type="button" class="btn btn-default" onclick="Buy()">Submit</button>
-    </form>
-
-    <h2>Commit Buy:</h2>
-    <form>
-      <button type="button" class="btn btn-default" onclick="CommitBuy()">Submit</button>
-    </form>
-
-    <h2>Cancel Buy:</h2>
-    <form>
-      <button type="button" class="btn btn-default" onclick="CancelBuy()">Submit</button>
-    </form>
-
-    <h2>Sell:</h2>
-    <form>
-      <div class="form-group">
-        <label for="sellstocksymbol">Stock Symbol:</label>
-        <input type="text" class="form-control" id="sellstocksymbol" placeholder="Enter stock symbol">
-      </div>
-      <div class="form-group">
-        <label for="sellamount">Amount:</label>
-        <input type="text" class="form-control" id="sellamount" placeholder="Enter amount">
-      </div>
-      <button type="button" class="btn btn-default" onclick="Sell()">Submit</button>
-    </form>
-
-    <h2>Commit Sell:</h2>
-    <form>
-      <button type="button" class="btn btn-default" onclick="CommitSell()">Submit</button>
-    </form>
-
-    <h2>Cancel Sell:</h2>
-    <form>
-      <button type="button" class="btn btn-default" onclick="CancelSell()">Submit</button>
-    </form>
-
-    <h2>Set Buy Amount:</h2>
-    <form>
-      <div class="form-group">
-        <label for="setbuystocksymbol">Stock Symbol:</label>
-        <input type="text" class="form-control" id="setbuystocksymbol" placeholder="Enter stock symbol">
-      </div>
-      <div class="form-group">
-        <label for="setbuyamount">Amount:</label>
-        <input type="text" class="form-control" id="setbuyamount" placeholder="Enter amount">
-      </div>
-      <button type="button" class="btn btn-default" onclick="SetBuyAmount()">Submit</button>
-    </form>
-
-    <h2>Cancel Set Buy:</h2>
-    <form>
-      <div class="form-group">
-        <label for="cancelbuystocksymbol">Stock Symbol:</label>
-        <input type="text" class="form-control" id="cancelbuystocksymbol" placeholder="Enter stock symbol">
-      </div>
-      <button type="button" class="btn btn-default" onclick="CancelSetBuy()">Submit</button>
-    </form>
-
-    <h2>Set Buy Trigger:</h2>
-    <form>
-      <div class="form-group">
-        <label for="setbuytrigstocksymbol">Stock Symbol:</label>
-        <input type="text" class="form-control" id="setbuytrigstocksymbol" placeholder="Enter stock symbol">
-      </div>
-      <div class="form-group">
-        <label for="setbuytrigamount">Amount:</label>
-        <input type="text" class="form-control" id="setbuytrigamount" placeholder="Enter amount">
-      </div>
-      <button type="button" class="btn btn-default" onclick="SetBuyTrigger()">Submit</button>
-    </form>
-
-    <h2>Set Sell Amount:</h2>
-    <form>
-      <div class="form-group">
-        <label for="setsellstocksymbol">Stock Symbol:</label>
-        <input type="text" class="form-control" id="setsellstocksymbol" placeholder="Enter stock symbol">
-      </div>
-      <div class="form-group">
-        <label for="setsellamount">Amount:</label>
-        <input type="text" class="form-control" id="setsellamount" placeholder="Enter amount">
-      </div>
-      <button type="button" class="btn btn-default" onclick="SetSellAmount()">Submit</button>
-    </form>
-
-    <h2>Cancel Set Sell:</h2>
-    <form>
-      <div class="form-group">
-        <label for="cancelsellstocksymbol">Stock Symbol:</label>
-        <input type="text" class="form-control" id="cancelsellstocksymbol" placeholder="Enter stock symbol">
-      </div>
-      <button type="button" class="btn btn-default" onclick="CancelSetSell()">Submit</button>
-    </form>
-
-    <h2>Set Sell Trigger:</h2>
-    <form>
-      <div class="form-group">
-        <label for="setselltrigstocksymbol">Stock Symbol:</label>
-        <input type="text" class="form-control" id="setselltrigstocksymbol" placeholder="Enter stock symbol">
-      </div>
-      <div class="form-group">
-        <label for="setselltrigamount">Amount:</label>
-        <input type="text" class="form-control" id="setselltrigamount" placeholder="Enter amount">
-      </div>
-      <button type="button" class="btn btn-default" onclick="SetSellTrigger()">Submit</button>
-    </form>
-
-    <h2>Dumplog:</h2>
-    <form>
-      <div class="form-group">
-        <label for="dumplogfile">Amount:</label>
-        <input type="text" class="form-control" id="dumplogfile" placeholder="Enter file name">
-      </div>
-      <button type="button" class="btn btn-default" onclick="Dumplog()">Submit</button>
-    </form>
-
-    <h2>Display Summary:</h2>
-    <form>
-      <button type="button" class="btn btn-default" onclick="DisplaySummary()">Submit</button>
-    </form>
+    <div style="float: left; width: 5%;"></div>
+    <div id="log" style="float: right; width: 65%; margin: 10px;">
+      <h2> Output: </h2>
+    </div>
   </div>
-</div>
-<div style="float: left; width: 5%;"></div>
-<div id="log" style="float: right; width: 65%; margin: 10px;">
-  <h2> Output: </h2>
 </div>
 <script type="text/javascript">
 if (localStorage["user"]) {
