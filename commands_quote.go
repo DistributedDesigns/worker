@@ -64,10 +64,11 @@ func (q quoteCmd) Execute() {
 		ID:         q.id,
 	}
 
-	// TODO: actually return a response
-	_ = getQuote(qr)
+	quote := getQuote(qr)
+	qMsg := fmt.Sprintf("%s is %s", quote.Stock, quote.Price)
 
 	acct := accountStore[q.userID]
+	acct.PushEvent(qMsg)
 	acct.AddSummaryItem("Finished " + q.Name())
 
 	consoleLog.Notice(" [✔] Finished", q.Name())
