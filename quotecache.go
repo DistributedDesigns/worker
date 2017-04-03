@@ -118,6 +118,23 @@ func getQuoteKey(stock string) string {
 	return redisBaseKey + ":quotes:" + stock
 }
 
+func getCachedQuote(qr types.QuoteRequest) (types.Quote, bool) {
+	conn := redisPool.Get()
+	defer conn.Close()
+	quoteKey := getQuoteKey(qr.Stock)
+	r, err := redis.String(conn.Do("GET", quoteKey))
+	if err == redis.ErrNil {
+		return types.Quote{}, false
+	} else if err != nil {
+		failOnError(err, "Could not retrieve quote from redis")
+	}
+
+	consoleLog.Debug(" [✔] Cache hit:", quoteKey)
+	quote, err := types.ParseQuote(r)
+	failOnError(err, "Could not parse quote from redis value")
+	return quote, true
+}
+
 // getQuote checks local redis for a quote
 func getQuote(qr types.QuoteRequest) types.Quote {
 	conn := redisPool.Get()

@@ -8,10 +8,12 @@ import (
 	"strings"
 	"time"
 
+	types "github.com/distributeddesigns/shared_types"
 	"github.com/garyburd/redigo/redis"
 	logging "github.com/op/go-logging"
 	"github.com/streadway/amqp"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
+
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -39,6 +41,7 @@ var (
 		Bool()
 
 	accountStore = make(map[string]*account)
+	workATXStore = make(map[types.AutoTxKey]types.AutoTxInit)
 
 	consoleLog = logging.MustGetLogger("console")
 	done       = make(chan struct{})
@@ -55,10 +58,15 @@ const (
 	dumplogQ         = "dumplog"
 	quoteRequestQ    = "quote_req"
 	quoteBroadcastEx = "quote_broadcast"
+	autoTxQueue      = "autoTx"
+	autoTxExchange   = "autoTx_resolved"
 
 	// Redis settings
 	pendingTxTimeout = 3
 )
+
+var autoTxInitChan = make(chan types.AutoTxInit)
+var autoTxCancelChan = make(chan types.AutoTxKey)
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
@@ -82,6 +90,9 @@ func main() {
 
 	// open http connections
 	go incomingTxWatcher()
+
+	go sendAutoTx()
+	go receiveAutoTx()
 
 	// Start concurrent actions
 	go catchQuoteBroadcasts()
@@ -170,7 +181,6 @@ func initRMQ() {
 	var err error
 	rmqConn, err = amqp.Dial(rabbitAddress)
 	failOnError(err, "Failed to rmqConnect to RabbitMQ")
-	// closed in main()
 }
 
 func initRedis() {
