@@ -63,6 +63,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Password for User %s is incorrect", cmd.User)
 		return
 	}
+	//fmt.Fprint(w, `{"Result":"Alice","Body":"Hello","Time":1294706395881547000}`)
 	fmt.Fprintf(w, "User %s successfully logged in", cmd.User)
 }
 
@@ -92,13 +93,25 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+var userSocketmap = make(map[string]websocket.Conn)
+
+var count int
+
 func wsHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	conn.WriteMessage(websocket.TextMessage, []byte("Hello"))
+	// frontend handshake to get user and hook them into the userMap for sockets
+	_, message, err := conn.ReadMessage()
+	failOnError(err, "Failed to handshake")
+	fmt.Printf("Handshake from client is %s\n", message)
+	greeting := fmt.Sprintf("Hello %d\n", count)
+	bye := fmt.Sprintf("Goodbye %d\n", count)
+	conn.WriteMessage(websocket.TextMessage, []byte(greeting))
+	conn.WriteMessage(websocket.TextMessage, []byte(bye))
+	count++
 }
 
 func incomingTxWatcher() {
