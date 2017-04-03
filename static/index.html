@@ -61,8 +61,8 @@ function SendPost(theCommand) {
   var url = '/push';
   var xhr = new XMLHttpRequest();
   xhr.open("POST", url, true);
-  var jsonshit = JSON.stringify({command: theCommand})
-  xhr.send(jsonshit);
+  var jsonPayload = JSON.stringify({command: theCommand})
+  xhr.send(jsonPayload);
 
 }
 function doAuth(rawData) {
