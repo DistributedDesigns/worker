@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Bootstrap Example</title>
+  <title>Stock Market</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -57,6 +57,7 @@
 //         appendLog(item);
 //     }
 // };
+<<<<<<< Updated upstream
 function SendPost(command) {
   var url = "/push";
   var commandStr="command="
@@ -66,21 +67,31 @@ function SendPost(command) {
   //Send the proper header information along with the request
   xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   xhr.send(theParams);
+=======
+function SendPost(theCommand) {
+  var url = '/push';
+  var request = new XMLHttpRequest();
+  request.open("POST", url, true);
+  var jsonPayload = JSON.stringify({command: theCommand})
+  request.send(jsonPayload);
 }
+
+function appendLog(item) {
+    var log = document.getElementById("log");
+    var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+    log.appendChild(item);
+    if (doScroll) {
+        log.scrollTop = log.scrollHeight - log.clientHeight;
+    }
+>>>>>>> Stashed changes
+}
+
 function doAuth(rawData) {
   localStorage["user"] = localStorage["user"] || document.getElementById("userid").value
   document.getElementById('loginview').style.display = 'none';
   document.getElementById('authview').style.display = 'block';
   var conn;
   var msg = document.getElementById("msg");
-  var log = document.getElementById("log");
-  function appendLog(item) {
-      var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
-      log.appendChild(item);
-      if (doScroll) {
-          log.scrollTop = log.scrollHeight - log.clientHeight;
-      }
-  }
   document.getElementById("form").onsubmit = function () {
       if (!conn) {
           return false;
@@ -281,7 +292,7 @@ function DisplaySummary() {
   console.log("Display summary")
 }
 </script>
-<div id="container">
+<div id="container" style="float: left; width: 30%; margin: 5px 20px;">
   <form id="loginview">
     <h2>Credentials:</h2>
     <div class="form-group">
@@ -296,8 +307,7 @@ function DisplaySummary() {
     <button type="button" class="btn btn-default" onclick="Auth()">Log In</button>
   </form>
   <div id="authview">
-    <div id="log"></div>
-    <div class="container">
+    <div class="container" style="display: none;">
         <div id="form">
           <input type="submit" value="Send" />
           <input type="text" id="msg" size="64"/>
@@ -451,6 +461,10 @@ function DisplaySummary() {
       <button type="button" class="btn btn-default">button</button>
     </form>
   </div>
+</div>
+<div style="float: left; width: 5%;"></div>
+<div id="log" style="float: right; width: 65%; margin: 10px;">
+  <h2> Output: </h2>
 </div>
 <script type="text/javascript">
 if (localStorage["user"]) {
