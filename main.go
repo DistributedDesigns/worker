@@ -65,6 +65,9 @@ const (
 	pendingTxTimeout = 3
 )
 
+var autoTxInitChan = make(chan types.AutoTxInit)
+var autoTxCancelChan = make(chan types.AutoTxKey)
+
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
@@ -88,6 +91,8 @@ func main() {
 	// open http connections
 	go incomingTxWatcher()
 
+	go sendAutoTxInit(autoTxInitChan)
+	go sendAutoTxCancel(autoTxCancelChan)
 	go receiveAutoTx()
 
 	// Start concurrent actions

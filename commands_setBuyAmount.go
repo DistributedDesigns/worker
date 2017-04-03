@@ -71,8 +71,7 @@ func (sba setBuyAmountCmd) Execute() {
 	_, found := workATXStore[autoTxKey]
 	if found {
 		// autoTx already exists, we'll need to cancel it.
-		// TODO
-
+		autoTxCancelChan <- autoTxKey
 	}
 
 	workATXStore[autoTxKey] = types.AutoTxInit{
@@ -80,6 +79,4 @@ func (sba setBuyAmountCmd) Execute() {
 		Amount:    sba.amount,
 		WorkerID:  *workerNum,
 	}
-	//fmt.Println(workATXStore)
-	// consoleLog.Warning("Not implemented: SET_BUY_AMOUNT")
 }

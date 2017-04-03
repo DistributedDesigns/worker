@@ -7,7 +7,6 @@ import (
 
 	"github.com/distributeddesigns/currency"
 	types "github.com/distributeddesigns/shared_types"
-	"github.com/streadway/amqp"
 )
 
 type setBuyTriggerCmd struct {
@@ -78,25 +77,6 @@ func (sbt setBuyTriggerCmd) Execute() {
 	}
 
 	autoTx.Trigger = sbt.amount
-
-	ch, err := rmqConn.Channel()
-	failOnError(err, "Failed to open a channel")
-	defer ch.Close()
-
-	body := autoTx.ToCSV()
-
-	err = ch.Publish(
-		"",          // exchange
-		autoTxQueue, // routing key
-		false,       // mandatory
-		false,       // immediate
-		amqp.Publishing{
-			ContentType: "text/csv",
-			Headers: amqp.Table{
-				"transType": "autoTxInit",
-			},
-			Body: []byte(body),
-		})
-	failOnError(err, "Failed to publish a message")
+	autoTxInitChan <- autoTx
 	consoleLog.Debugf("Published aTx %v successfully", autoTx)
 }

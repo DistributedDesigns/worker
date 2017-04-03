@@ -71,8 +71,7 @@ func (ssa setSellAmountCmd) Execute() {
 	_, found := workATXStore[autoTxKey]
 	if found {
 		// autoTx already exists, we'll need to cancel it.
-		// TODO
-
+		autoTxCancelChan <- autoTxKey
 	}
 
 	workATXStore[autoTxKey] = types.AutoTxInit{
@@ -80,5 +79,5 @@ func (ssa setSellAmountCmd) Execute() {
 		Amount:    ssa.amount,
 		WorkerID:  *workerNum,
 	}
-	// consoleLog.Warning("Not implemented: SET_SELL_AMOUNT")
+	autoTxInitChan <- workATXStore[autoTxKey]
 }
