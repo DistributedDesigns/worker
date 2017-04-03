@@ -59,10 +59,25 @@
 // };
 function SendPost(theCommand) {
   var url = '/push';
-  var xhr = new XMLHttpRequest();
-  xhr.open("POST", url, true);
+  var request = new XMLHttpRequest();
+  request.open("POST", url, true);
+  // xhr.onload = function() {
+  //   if (request.status >= 200 && request.status < 400) {
+  //     // Success!
+  //     // var data = request.responseText;
+  //     // console.log(data)
+  //     doAuth(request.responseText)
+  //   } else {
+  //     // We reached our target server, but it returned an error
+  //     console.log("Failed to Auth user")
+  //   }
+  // };
+
+  // request.onerror = function() {
+  //   // There was a connection error of some sort
+  // };
   var jsonPayload = JSON.stringify({command: theCommand})
-  xhr.send(jsonPayload);
+  request.send(jsonPayload);
 
 }
 function doAuth(rawData) {
