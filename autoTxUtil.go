@@ -11,15 +11,38 @@ func updateAccount(autoTxFilled types.AutoTxFilled) {
 	return
 }
 
-func fulfillAutoTx(autoTxKey types.AutoTxKey, ch *amqp.Channel, header string, body string) {
-	qr := types.QuoteRequest{
-		Stock:      autoTxKey.Stock,
-		UserID:     autoTxKey.UserID,
-		AllowCache: true,
-		ID:         ^uint64(0),
-	}
-	found := hasQuote(qr)
-	if !found {
+func sendAutoTxInit(autoTxInitChan <-chan types.AutoTxInit) {
+	ch, err := rmqConn.Channel()
+	failOnError(err, "Failed to open a channel")
+	defer ch.Close()
+	for {
+		autoTxInit := <-autoTxInitChan
+		autoTxKey := autoTxInit.AutoTxKey
+
+		qr := types.QuoteRequest{
+			Stock:  autoTxKey.Stock,
+			UserID: autoTxKey.UserID,
+		}
+		quote, found := getCachedQuote(qr)
+		var validTrigger bool
+		if autoTxKey.Action == "Buy" {
+			validTrigger = found && (quote.Price.ToFloat() < autoTxInit.Trigger.ToFloat())
+		} else {
+			validTrigger = found && (quote.Price.ToFloat() > autoTxInit.Trigger.ToFloat())
+		}
+
+		if validTrigger {
+			// TODO: DO MATH FOR FILLED TRANS
+			curr, err := currency.NewFromFloat(0.00)
+			failOnError(err, "Failed to parse currency")
+			autoTxFilled := types.AutoTxFilled{
+				AddFunds:  curr,
+				AddStocks: uint(0),
+				AutoTxKey: autoTxKey,
+			}
+			updateAccount(autoTxFilled)
+			continue
+		}
 		// No quote found, let's autoTx that
 		err := ch.Publish(
 			"",          // exchange
@@ -29,32 +52,11 @@ func fulfillAutoTx(autoTxKey types.AutoTxKey, ch *amqp.Channel, header string, b
 			amqp.Publishing{
 				ContentType: "text/csv",
 				Headers: amqp.Table{
-					"transType": header,
+					"transType": "autoTxInit",
 				},
-				Body: []byte(body),
+				Body: []byte(autoTxInit.ToCSV()),
 			})
 		failOnError(err, "Failed to publish a message")
-		return
-	}
-	// TODO: DO MATH FOR FILLED TRANS
-	curr, err := currency.NewFromFloat(0.00)
-	failOnError(err, "Failed to parse currency")
-	autoTxFilled := types.AutoTxFilled{
-		AddFunds:  curr,
-		AddStocks: uint(0),
-		AutoTxKey: autoTxKey,
-	}
-	updateAccount(autoTxFilled)
-}
-
-func sendAutoTxInit(autoTxInitChan <-chan types.AutoTxInit) {
-	ch, err := rmqConn.Channel()
-	failOnError(err, "Failed to open a channel")
-	defer ch.Close()
-	for {
-		autoTxInit := <-autoTxInitChan
-		autoTxKey := autoTxInit.AutoTxKey
-		fulfillAutoTx(autoTxKey, ch, "autoTxInit", autoTxInit.ToCSV())
 	}
 }
 
@@ -64,6 +66,18 @@ func sendAutoTxCancel(autoTxCancelChan <-chan types.AutoTxKey) {
 	defer ch.Close()
 	for {
 		autoTxKey := <-autoTxCancelChan
-		fulfillAutoTx(autoTxKey, ch, "autoTxCancel", autoTxKey.ToCSV())
+		err := ch.Publish(
+			"",          // exchange
+			autoTxQueue, // routing key
+			false,       // mandatory
+			false,       // immediate
+			amqp.Publishing{
+				ContentType: "text/csv",
+				Headers: amqp.Table{
+					"transType": "autoTxCancel",
+				},
+				Body: []byte(autoTxKey.ToCSV()),
+			})
+		failOnError(err, "Failed to publish a message")
 	}
 }
