@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/distributeddesigns/currency"
+	"github.com/gorilla/websocket"
 )
 
 type portfolio map[string]uint64
@@ -115,6 +116,15 @@ func (ac *account) PruneExpiredTxs() {
 type summaryItem struct {
 	loggedAt time.Time
 	message  string
+}
+
+func (ac *account) PushEvent(user string, message string) {
+	socket, found := userSocketmap[user]
+	if !found {
+		consoleLog.Debugf("User %s is not subscribed to a socket connection", user)
+		return
+	}
+	socket.WriteMessage(websocket.TextMessage, []byte(message))
 }
 
 func (ac *account) AddSummaryItem(s string) {

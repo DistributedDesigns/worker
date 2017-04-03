@@ -16,7 +16,7 @@ type commandStruct struct {
 
 var userAuthStore = make(map[string]string)
 
-var conn redis.Conn
+var txWatcherRedisConn redis.Conn
 
 var reqCounter uint64
 
@@ -31,7 +31,7 @@ func pushHandler(w http.ResponseWriter, r *http.Request) {
 	//Validate Command
 	//Add it to Redis
 	redisCmd := fmt.Sprintf("[%d] %s\n", reqCounter, cmd.Command)
-	_, err = conn.Do("RPUSH", pendingTxKey, redisCmd)
+	_, err = txWatcherRedisConn.Do("RPUSH", pendingTxKey, redisCmd)
 
 	failOnError(err, "Failed to push to worker queue") // This will result in requests hanging
 	if err != nil {
@@ -93,9 +93,9 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-var userSocketmap = make(map[string]websocket.Conn)
+var userSocketmap = make(map[string]*websocket.Conn)
 
-var count int
+//var count int
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -107,17 +107,26 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	_, message, err := conn.ReadMessage()
 	failOnError(err, "Failed to handshake")
 	fmt.Printf("Handshake from client is %s\n", message)
-	greeting := fmt.Sprintf("Hello %d\n", count)
-	bye := fmt.Sprintf("Goodbye %d\n", count)
-	conn.WriteMessage(websocket.TextMessage, []byte(greeting))
-	conn.WriteMessage(websocket.TextMessage, []byte(bye))
-	count++
+	userSocket, found := userSocketmap[string(message)]
+	if found {
+		userSocket.Close()
+	}
+	userSocketmap[string(message)] = conn
+	// greeting := fmt.Sprintf("Hello %d\n", count)
+	// bye := fmt.Sprintf("Goodbye %d\n", count)
+	// conn.WriteMessage(websocket.TextMessage, []byte(greeting))
+	// conn.WriteMessage(websocket.TextMessage, []byte(bye))
+	// fmt.Println(userSocketmap)
+	// _, message, err = conn.ReadMessage()
+	// failOnError(err, "Failed to offshake")
+	// fmt.Printf("Failout from client is %s\n", message)
+	//count++
 }
 
 func incomingTxWatcher() {
 
-	conn = redisPool.Get()
-	port := fmt.Sprintf(":%d", config.Redis.Port+*workerNum)
+	txWatcherRedisConn = redisPool.Get()
+	port := fmt.Sprintf(":%d", config.WebSocketPort)
 	fmt.Printf("Started watching on port %s\n", port)
 	http.HandleFunc("/push", pushHandler)
 	http.HandleFunc("/auth", authHandler)

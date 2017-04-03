@@ -57,21 +57,11 @@
 //         appendLog(item);
 //     }
 // };
-<<<<<<< Updated upstream
-function SendPost(command) {
-  var url = "/push";
-  var commandStr="command="
-  var theParams = commandStr + command
-  var xhr = new XMLHttpRequest();
-  xhr.open("POST", url, true);
-  //Send the proper header information along with the request
-  xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-  xhr.send(theParams);
-=======
 function SendPost(theCommand) {
   var url = '/push';
   var request = new XMLHttpRequest();
   request.open("POST", url, true);
+
   var jsonPayload = JSON.stringify({command: theCommand})
   request.send(jsonPayload);
 }
@@ -83,7 +73,24 @@ function appendLog(item) {
     if (doScroll) {
         log.scrollTop = log.scrollHeight - log.clientHeight;
     }
->>>>>>> Stashed changes
+  // xhr.onload = function() {
+  //   if (request.status >= 200 && request.status < 400) {
+  //     // Success!
+  //     // var data = request.responseText;
+  //     // console.log(data)
+  //     doAuth(request.responseText)
+  //   } else {
+  //     // We reached our target server, but it returned an error
+  //     console.log("Failed to Auth user")
+  //   }
+  // };
+
+  // request.onerror = function() {
+  //   // There was a connection error of some sort
+  // };
+  var jsonPayload = JSON.stringify({command: theCommand})
+  request.send(jsonPayload);
+
 }
 
 function doAuth(rawData) {
@@ -110,6 +117,7 @@ function doAuth(rawData) {
         conn.send(localStorage["user"])
       }
       conn.onclose = function (evt) {
+          conn.send("MY ASS")
           var item = document.createElement("div");
           item.innerHTML = "<b>Connection closed.</b>";
           appendLog(item);
@@ -175,120 +183,75 @@ function Create() {
   request.send(JSON.stringify({user: document.getElementById("userid").value, pass: document.getElementById("pwd").value}));
 }
 function Add() {
-  var userID = document.getElementById("userid").value
-  var addamount = document.getElementById("addamount").value
-  var cmd = "ADD,"+userID+","+String(addamount)
-  SendPost(cmd)
+  SendPost("ADD,"+localStorage["user"]+","+document.getElementById("addamount").value)
   console.log("Add")
-  console.log(typeof (addamount))
-  console.log(typeof (userID))
 }
 function Quote() {
-  var userID = document.getElementById("userid").value
-  var stocksymbol = document.getElementById("quotestocksymbol").value
-  var cmd = "QUOTE,"+userID+","+stocksymbol
-  SendPost(cmd)
+  SendPost("QUOTE,"+localStorage["user"]+","+document.getElementById("quotestocksymbol").value.toUpperCase())
   console.log("Quote")
 }
 function Buy() {
-  var userID = document.getElementById("userid").value
-  var stocksymbol = document.getElementById("buystocksymbol").value
-  var amnt = document.getElementById("buyamount").value
-  var cmd = "BUY,"+userID+","+stocksymbol+","+amnt
-  SendPost(cmd)
+  SendPost("BUY,"+localStorage["user"]+","+document.getElementById("buystocksymbol").value.toUpperCase()+","+document.getElementById("buyamount").value)
   console.log("Buy")
 }
 function CommitBuy() {
-  var userID = document.getElementById("userid").value
-  var cmd = "COMMIT_BUY,"+userID
+  SendPost("COMMIT_BUY,"+localStorage["user"])
   console.log("Commit Buy")
 }
 function CancelBuy() {
-  var userID = document.getElementById("userid").value
-  var cmd = "CANCEL_BUY,"+userID
+  SendPost("CANCEL_BUY,"+localStorage["user"])
   console.log("Cancel Buy")
 }
 function Sell() {
-  var userID = document.getElementById("userid").value
-  var stocksymbol = document.getElementById("sellstocksymbol").value
-  var amnt = document.getElementById("sellamount").value
-  var cmd = "SELL,"+userID+","+stocksymbol+","+amnt
-  SendPost(cmd)
+  SendPost("SELL,"+localStorage["user"]+","+document.getElementById("sellstocksymbol").value.toUpperCase()+","+document.getElementById("sellamount").value)
   console.log("Sell")
 }
 function CommitSell() {
-  var userID = document.getElementById("userid").value
-  var cmd = "COMMIT_SELL,"+userID
+  SendPost("COMMIT_SELL,"+localStorage["user"])
   console.log("Commit Sell")
 }
 function CancelSell() {
-  var userID = document.getElementById("userid").value
-  var cmd = "CANCEL_SELL,"+userID
+  SendPost("CANCEL_SELL,"+localStorage["user"])
   console.log("Cancel Sell")
 }
 function SetBuyAmount() {
-  var userID = document.getElementById("userid").value
-  var stocksymbol = document.getElementById("setbuystocksymbol").value
-  var amnt = document.getElementById("setbuyamount").value
-  var cmd = "SET_BUY_AMOUNT,"+userID+","+stocksymbol+","+amnt
-  SendPost(cmd)
+  SendPost("SET_BUY_AMOUNT,"+localStorage["user"]+","+document.getElementById("setbuystocksymbol").value.toUpperCase()+","+document.getElementById("setbuyamount").value)
   console.log("Set buy amount")
 }
 function CancelSetBuy() {
-  var userID = document.getElementById("userid").value
-  var stocksymbol = document.getElementById("cancelbuystocksymbol").value
-  var cmd = "CANCEL_SET_BUY,"+userID+","+stocksymbol
-  SendPost(cmd)
+  SendPost("CANCEL_SET_BUY,"+localStorage["user"]+","+document.getElementById("cancelbuystocksymbol").value.toUpperCase())
   console.log("Cancel set buy")
 }
 function SetBuyTrigger() {
-  var userID = document.getElementById("userid").value
-  var stocksymbol = document.getElementById("setbuytrigstocksymbol").value
-  var amnt = document.getElementById("setbuytrigamount").value
-  var cmd = "SET_BUY_TRIGGER,"+userID+","+stocksymbol+","+amnt
-  SendPost(cmd)
+  SendPost("SET_BUY_TRIGGER,"+localStorage["user"]+","+document.getElementById("setbuytrigstocksymbol").value.toUpperCase()+","+document.getElementById("setbuytrigamount").value)
   console.log("Set buy trigger")
 }
 function SetSellAmount() {
-  var userID = document.getElementById("userid").value
-  var stocksymbol = document.getElementById("setsellstocksymbol").value
-  var amnt = document.getElementById("setsellamount").value
-  var cmd = "SET_SELL_AMOUNT,"+userID+","+stocksymbol+","+amnt
-  SendPost(cmd)
+  SendPost("SET_SELL_AMOUNT,"+localStorage["user"]+","+document.getElementById("setsellstocksymbol").value.toUpperCase()+","+document.getElementById("setsellamount").value)
   console.log("Set Sell Amount")
 }
 function CancelSetSell() {
-  var userID = document.getElementById("userid").value
-  var stocksymbol = document.getElementById("cancelsellstocksymbol").value
-  var cmd = "CANCEL_SET_SELL,"+userID+","+stocksymbol
-  SendPost(cmd)
+  SendPost("CANCEL_SET_SELL,"+localStorage["user"]+","+document.getElementById("cancelsellstocksymbol").value.toUpperCase())
   console.log("Cancel set sell")
 }
 function SetSellTrigger() {
-  var userID = document.getElementById("userid").value
-  var stocksymbol = document.getElementById("setselltrigstocksymbol").value
-  var amnt = document.getElementById("setselltrigamount").value
-  var cmd = "SET_SELL_TRIGGER,"+userID+","+stocksymbol+","+amnt
-  SendPost(cmd)
+  SendPost("SET_SELL_TRIGGER,"+localStorage["user"]+","+document.getElementById("setselltrigstocksymbol").value.toUpperCase()+","+document.getElementById("setselltrigamount").value)
   console.log("Set sell trigger")
 }
 function Dumplog() {
-  var userID = document.getElementById("userid").value
+  var userID = localStorage["user"]
   if(userID === "admin"){
     SendPost("DUMPLOG,out.dump")
     console.log("Admin Dump")
   }
   else
   {
-    var fn = document.getElementById("dumplogfile").value
-    var cmd = "DUMPLOG,"+userID+","+fn
-    SendPost(cmd)
+    SendPost("DUMPLOG"+localStorage["user"]+","+document.getElementById("dumplogfile").value)
     console.log("User Dump")
   }
 }
 function DisplaySummary() {
-  var userID = document.getElementById("userid").value
-  var cmd = "DISPLAY_SUMMARY,"+userID
+  SendPost("DISPLAY_SUMMARY,"+localStorage["user"])
   console.log("Display summary")
 }
 </script>
@@ -328,7 +291,7 @@ function DisplaySummary() {
         <label for="quotestocksymbol">Stock Symbol:</label>
         <input type="text" class="form-control" id="quotestocksymbol" placeholder="Enter stock symbol">
       </div>
-      <button type="button" class="btn btn-default" onclick="Quote()">button</button>
+      <button type="button" class="btn btn-default" onclick="Quote()">Submit</button>
     </form>
 
     <h2>Buy:</h2>
@@ -341,17 +304,17 @@ function DisplaySummary() {
         <label for="buyamount">Amount:</label>
         <input type="text" class="form-control" id="buyamount" placeholder="Enter amount">
       </div>
-      <button type="button" class="btn btn-default" onclick="Buy()">button</button>
+      <button type="button" class="btn btn-default" onclick="Buy()">Submit</button>
     </form>
 
     <h2>Commit Buy:</h2>
     <form>
-      <button type="button" class="btn btn-default" onclick="CommitBuy()">button</button>
+      <button type="button" class="btn btn-default" onclick="CommitBuy()">Submit</button>
     </form>
 
     <h2>Cancel Buy:</h2>
     <form>
-      <button type="button" class="btn btn-default">button</button>
+      <button type="button" class="btn btn-default" onclick="CancelBuy()">Submit</button>
     </form>
 
     <h2>Sell:</h2>
@@ -364,17 +327,17 @@ function DisplaySummary() {
         <label for="sellamount">Amount:</label>
         <input type="text" class="form-control" id="sellamount" placeholder="Enter amount">
       </div>
-      <button type="button" class="btn btn-default">button</button>
+      <button type="button" class="btn btn-default" onclick="Sell()">Submit</button>
     </form>
 
     <h2>Commit Sell:</h2>
     <form>
-      <button type="button" class="btn btn-default">button</button>
+      <button type="button" class="btn btn-default" onclick="CommitSell()">Submit</button>
     </form>
 
     <h2>Cancel Sell:</h2>
     <form>
-      <button type="button" class="btn btn-default">button</button>
+      <button type="button" class="btn btn-default" onclick="CancelSell()">Submit</button>
     </form>
 
     <h2>Set Buy Amount:</h2>
@@ -387,7 +350,7 @@ function DisplaySummary() {
         <label for="setbuyamount">Amount:</label>
         <input type="text" class="form-control" id="setbuyamount" placeholder="Enter amount">
       </div>
-      <button type="button" class="btn btn-default">button</button>
+      <button type="button" class="btn btn-default" onclick="SetBuyAmount()">Submit</button>
     </form>
 
     <h2>Cancel Set Buy:</h2>
@@ -396,7 +359,7 @@ function DisplaySummary() {
         <label for="cancelbuystocksymbol">Stock Symbol:</label>
         <input type="text" class="form-control" id="cancelbuystocksymbol" placeholder="Enter stock symbol">
       </div>
-      <button type="button" class="btn btn-default">button</button>
+      <button type="button" class="btn btn-default" onclick="CancelSetBuy()">Submit</button>
     </form>
 
     <h2>Set Buy Trigger:</h2>
@@ -409,7 +372,7 @@ function DisplaySummary() {
         <label for="setbuytrigamount">Amount:</label>
         <input type="text" class="form-control" id="setbuytrigamount" placeholder="Enter amount">
       </div>
-      <button type="button" class="btn btn-default">button</button>
+      <button type="button" class="btn btn-default" onclick="SetBuyTrigger()">Submit</button>
     </form>
 
     <h2>Set Sell Amount:</h2>
@@ -422,7 +385,7 @@ function DisplaySummary() {
         <label for="setsellamount">Amount:</label>
         <input type="text" class="form-control" id="setsellamount" placeholder="Enter amount">
       </div>
-      <button type="button" class="btn btn-default">button</button>
+      <button type="button" class="btn btn-default" onclick="SetSellAmount()">Submit</button>
     </form>
 
     <h2>Cancel Set Sell:</h2>
@@ -431,7 +394,7 @@ function DisplaySummary() {
         <label for="cancelsellstocksymbol">Stock Symbol:</label>
         <input type="text" class="form-control" id="cancelsellstocksymbol" placeholder="Enter stock symbol">
       </div>
-      <button type="button" class="btn btn-default">button</button>
+      <button type="button" class="btn btn-default" onclick="CancelSetSell()">Submit</button>
     </form>
 
     <h2>Set Sell Trigger:</h2>
@@ -444,7 +407,7 @@ function DisplaySummary() {
         <label for="setselltrigamount">Amount:</label>
         <input type="text" class="form-control" id="setselltrigamount" placeholder="Enter amount">
       </div>
-      <button type="button" class="btn btn-default">button</button>
+      <button type="button" class="btn btn-default" onclick="SetSellTrigger()">Submit</button>
     </form>
 
     <h2>Dumplog:</h2>
@@ -453,12 +416,12 @@ function DisplaySummary() {
         <label for="dumplogfile">Amount:</label>
         <input type="text" class="form-control" id="dumplogfile" placeholder="Enter file name">
       </div>
-      <button type="button" class="btn btn-default">button</button>
+      <button type="button" class="btn btn-default" onclick="Dumplog()">Submit</button>
     </form>
 
     <h2>Display Summary:</h2>
     <form>
-      <button type="button" class="btn btn-default">button</button>
+      <button type="button" class="btn btn-default" onclick="DisplaySummary()">Submit</button>
     </form>
   </div>
 </div>
