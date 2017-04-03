@@ -63,7 +63,6 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Password for User %s is incorrect", cmd.User)
 		return
 	}
-	//fmt.Fprint(w, `{"Result":"Alice","Body":"Hello","Time":1294706395881547000}`)
 	fmt.Fprintf(w, "User %s successfully logged in", cmd.User)
 }
 
@@ -95,8 +94,6 @@ var upgrader = websocket.Upgrader{
 
 var userSocketmap = make(map[string]*websocket.Conn)
 
-//var count int
-
 func wsHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -112,15 +109,6 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		userSocket.Close()
 	}
 	userSocketmap[string(message)] = conn
-	// greeting := fmt.Sprintf("Hello %d\n", count)
-	// bye := fmt.Sprintf("Goodbye %d\n", count)
-	// conn.WriteMessage(websocket.TextMessage, []byte(greeting))
-	// conn.WriteMessage(websocket.TextMessage, []byte(bye))
-	// fmt.Println(userSocketmap)
-	// _, message, err = conn.ReadMessage()
-	// failOnError(err, "Failed to offshake")
-	// fmt.Printf("Failout from client is %s\n", message)
-	//count++
 }
 
 func incomingTxWatcher() {
