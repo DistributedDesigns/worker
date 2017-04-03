@@ -6,6 +6,7 @@ import (
 	"time"
 
 	types "github.com/distributeddesigns/shared_types"
+	"github.com/streadway/amqp"
 )
 
 type cancelSetBuyCmd struct {
@@ -55,5 +56,30 @@ func (csb cancelSetBuyCmd) ToAuditEvent() types.AuditEvent {
 }
 
 func (csb cancelSetBuyCmd) Execute() {
-	consoleLog.Warning("Not implemented: CANCEL_SET_BUY")
+	autoTxKey := types.AutoTxKey{
+		Stock:  csb.stock,
+		UserID: csb.userID,
+		Action: "Sell",
+	}
+	delete(workATXStore, autoTxKey)
+	ch, err := rmqConn.Channel()
+	failOnError(err, "Failed to open a channel")
+	defer ch.Close()
+
+	body := autoTxKey.ToCSV()
+
+	err = ch.Publish(
+		"",          // exchange
+		autoTxQueue, // routing key
+		false,       // mandatory
+		false,       // immediate
+		amqp.Publishing{
+			ContentType: "text/csv",
+			Headers: amqp.Table{
+				"transType": "autoTxKey",
+			},
+			Body: []byte(body),
+		})
+	failOnError(err, "Failed to publish a message")
+	consoleLog.Debugf("Published aTx %v successfully", autoTxKey)
 }
