@@ -91,8 +91,7 @@ func main() {
 	// open http connections
 	go incomingTxWatcher()
 
-	go sendAutoTxInit(autoTxInitChan)
-	go sendAutoTxCancel(autoTxCancelChan)
+	go sendAutoTx()
 	go receiveAutoTx()
 
 	// Start concurrent actions
