@@ -16,8 +16,6 @@ func receiveAutoTx() {
 	// get channel
 	ch, err := rmqConn.Channel()
 	failOnError(err, "Failed to open a channel")
-	// //consume on
-	// defer ch.Close()
 	defer ch.Close()
 
 	// Make sure all of the expected RabbitMQ exchanges and queues
@@ -73,7 +71,5 @@ func receiveAutoTx() {
 		consoleLog.Debugf("AutoTxFilled is : %+v\n", autoTxFilled)
 		fulfilAutoTx(autoTxFilled)
 	}
-
-	// failOnError(err, "Failed to consume from quoteBroadcast Channel")
 	fmt.Printf("AutoTxWorker Receiver Spinning\n")
 }
