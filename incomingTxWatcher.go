@@ -93,7 +93,7 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-var userSocketmap = make(map[string]websocket.Conn)
+var userSocketmap = make(map[string]*websocket.Conn)
 
 var count int
 
@@ -107,10 +107,19 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	_, message, err := conn.ReadMessage()
 	failOnError(err, "Failed to handshake")
 	fmt.Printf("Handshake from client is %s\n", message)
+	userSocket, found := userSocketmap[string(message)]
+	if found {
+		userSocket.Close()
+	}
+	userSocketmap[string(message)] = conn
 	greeting := fmt.Sprintf("Hello %d\n", count)
 	bye := fmt.Sprintf("Goodbye %d\n", count)
 	conn.WriteMessage(websocket.TextMessage, []byte(greeting))
 	conn.WriteMessage(websocket.TextMessage, []byte(bye))
+	fmt.Println(userSocketmap)
+	// _, message, err = conn.ReadMessage()
+	// failOnError(err, "Failed to offshake")
+	// fmt.Printf("Failout from client is %s\n", message)
 	count++
 }
 

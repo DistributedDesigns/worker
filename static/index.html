@@ -99,6 +99,7 @@ function doAuth(rawData) {
         conn.send(localStorage["user"])
       }
       conn.onclose = function (evt) {
+          conn.send("MY ASS")
           var item = document.createElement("div");
           item.innerHTML = "<b>Connection closed.</b>";
           appendLog(item);
