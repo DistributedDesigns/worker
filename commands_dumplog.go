@@ -20,11 +20,11 @@ type dumplogCmd struct {
 
 func parseDumplogCmd(parts []string) dumplogCmd {
 	if len(parts) < 3 {
-		abortTx("DUMPLOG needs at least 3 parts")
+		abortParse("DUMPLOG needs at least 3 parts")
 	}
 
 	id, err := strconv.ParseUint(parts[0], 10, 64)
-	abortTxOnError(err, "Could not parse ID")
+	abortParseOnError(err, "Could not parse ID")
 
 	// Dumplog is overloaded as
 	// 1) DUMPLOG,$filename

@@ -18,14 +18,14 @@ type setBuyAmountCmd struct {
 
 func parseSetBuyAmountCmd(parts []string) setBuyAmountCmd {
 	if len(parts) != 5 {
-		abortTx("SET_BUY_AMOUNT needs 5 parts")
+		abortParse("SET_BUY_AMOUNT needs 5 parts")
 	}
 
 	id, err := strconv.ParseUint(parts[0], 10, 64)
-	abortTxOnError(err, "Could not parse ID")
+	abortParseOnError(err, "Could not parse ID")
 
 	amount, err := currency.NewFromString(parts[4])
-	abortTxOnError(err, "Could not parse amount in transaction")
+	abortParseOnError(err, "Could not parse amount in transaction")
 
 	return setBuyAmountCmd{
 		id:     id,
@@ -79,5 +79,8 @@ func (sba setBuyAmountCmd) Execute() {
 		Amount:    sba.amount,
 		WorkerID:  *workerNum,
 	}
+
+	acct := accountStore[sba.userID]
+	acct.AddSummaryItem("Finished " + sba.Name())
 	consoleLog.Notice(" [✔] Finished", sba.Name())
 }

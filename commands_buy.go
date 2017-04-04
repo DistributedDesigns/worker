@@ -21,14 +21,14 @@ type buyCmd struct {
 
 func parseBuyCmd(parts []string) buyCmd {
 	if len(parts) != 5 {
-		abortTx("BUY needs 5 parts")
+		abortParse("BUY needs 5 parts")
 	}
 
 	id, err := strconv.ParseUint(parts[0], 10, 64)
-	abortTxOnError(err, "Could not parse ID")
+	abortParseOnError(err, "Could not parse ID")
 
 	amount, err := currency.NewFromString(parts[4])
-	abortTxOnError(err, "Could not parse amount in transaction")
+	abortParseOnError(err, "Could not parse amount in transaction")
 
 	return buyCmd{
 		id:     id,
@@ -76,7 +76,7 @@ func (b buyCmd) Execute() {
 	// quote retrieval it passes back an error message that is most informative
 	// for the user.
 	if acct.balance.ToFloat() < b.amount.ToFloat() {
-		abortTx(b.Name() + " Insufficient funds")
+		abortTx(b.userID, b.Name()+" Insufficient funds")
 	}
 
 	// Get a quote for the stock
@@ -101,7 +101,7 @@ func (b buyCmd) Execute() {
 	quantityToBuy, purchaseAmount := q.Price.FitsInto(b.amount)
 	consoleLog.Debugf("Want to buy %d stock", quantityToBuy)
 	if quantityToBuy < 1 {
-		abortTx(b.Name() + " Cannot buy less than one stock")
+		abortTx(b.userID, b.Name()+" Cannot buy less than one stock")
 	}
 
 	// If yes...
@@ -114,7 +114,7 @@ func (b buyCmd) Execute() {
 	b.expiresAt = q.Timestamp.Add(time.Second * 60)
 
 	err := acct.RemoveFunds(purchaseAmount)
-	abortTxOnError(err, "This should be impossible!")
+	abortTxOnError(err, b.userID, "This should be impossible!")
 	acct.pendingBuys.Push(b)
 
 	acct.AddSummaryItem("Finished " + b.Name())

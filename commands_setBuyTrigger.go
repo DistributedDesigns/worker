@@ -18,14 +18,14 @@ type setBuyTriggerCmd struct {
 
 func parseSetBuyTriggerCmd(parts []string) setBuyTriggerCmd {
 	if len(parts) != 5 {
-		abortTx("SET_BUY_TRIGGER needs 5 parts")
+		abortParse("SET_BUY_TRIGGER needs 5 parts")
 	}
 
 	id, err := strconv.ParseUint(parts[0], 10, 64)
-	abortTxOnError(err, "Could not parse ID")
+	abortParseOnError(err, "Could not parse ID")
 
 	amount, err := currency.NewFromString(parts[4])
-	abortTxOnError(err, "Could not parse amount in transaction")
+	abortParseOnError(err, "Could not parse amount in transaction")
 
 	return setBuyTriggerCmd{
 		id:     id,
@@ -79,5 +79,8 @@ func (sbt setBuyTriggerCmd) Execute() {
 	autoTx.Trigger = sbt.amount
 	autoTxInitChan <- autoTx
 	consoleLog.Debugf("Published aTx %v successfully", autoTx)
+
+	acct := accountStore[sbt.userID]
+	acct.AddSummaryItem("Finished " + sbt.Name())
 	consoleLog.Notice(" [✔] Finished", sbt.Name())
 }

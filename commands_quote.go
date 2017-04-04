@@ -16,11 +16,11 @@ type quoteCmd struct {
 
 func parseQuoteCmd(parts []string) quoteCmd {
 	if len(parts) != 4 {
-		abortTx("QUOTE needs 4 parts")
+		abortParse("QUOTE needs 4 parts")
 	}
 
 	id, err := strconv.ParseUint(parts[0], 10, 64)
-	abortTxOnError(err, "Could not parse ID")
+	abortParseOnError(err, "Could not parse ID")
 
 	return quoteCmd{
 		id:     id,

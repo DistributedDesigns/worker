@@ -21,14 +21,14 @@ type sellCmd struct {
 
 func parseSellCmd(parts []string) sellCmd {
 	if len(parts) != 5 {
-		abortTx("SELL needs 5 parts")
+		abortParse("SELL needs 5 parts")
 	}
 
 	id, err := strconv.ParseUint(parts[0], 10, 64)
-	abortTxOnError(err, "Could not parse ID")
+	abortParseOnError(err, "Could not parse ID")
 
 	amount, err := currency.NewFromString(parts[4])
-	abortTxOnError(err, "Could not parse amount in transaction")
+	abortParseOnError(err, "Could not parse amount in transaction")
 
 	return sellCmd{
 		id:     id,
@@ -75,7 +75,7 @@ func (s sellCmd) Execute() {
 	// Check if user has any stock, abort early
 	stockHoldings, found := acct.portfolio[s.stock]
 	if !found || stockHoldings == 0 {
-		abortTx(s.Name() + " User does not have any stock to sell")
+		abortTx(s.userID, s.Name()+" User does not have any stock to sell")
 	}
 
 	// Get a quote for the stock
@@ -100,7 +100,7 @@ func (s sellCmd) Execute() {
 	quantityToSell, profit := q.Price.FitsInto(s.amount)
 	consoleLog.Debugf("Want to sell %d stock", quantityToSell)
 	if quantityToSell < 1 {
-		abortTx(s.Name() + " Cannot sell less than one stock")
+		abortTx(s.userID, s.Name()+" Cannot sell less than one stock")
 	}
 
 	// If yes...
@@ -113,7 +113,7 @@ func (s sellCmd) Execute() {
 	s.expiresAt = q.Timestamp.Add(time.Second * 60)
 
 	err := acct.RemoveStock(s.stock, s.quantityToSell)
-	abortTxOnError(err, s.Name())
+	abortTxOnError(err, s.userID, s.Name())
 	acct.pendingSells.Push(s)
 
 	acct.AddSummaryItem("Finished " + s.Name())

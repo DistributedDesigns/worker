@@ -47,12 +47,26 @@ func processTxs(unprocessedTxs <-chan string) {
 	cmd.Execute()
 }
 
-func abortTx(msg string) {
+func abortParse(msg string) {
 	panic(msg)
 }
 
-func abortTxOnError(err error, msg string) {
+func abortParseOnError(err error, msg string) {
 	if err != nil {
+		panic(msg)
+	}
+}
+
+func abortTx(userID, msg string) {
+	acct := accountStore[userID]
+	acct.PushEvent(msg)
+	panic(msg)
+}
+
+func abortTxOnError(err error, userID, msg string) {
+	if err != nil {
+		acct := accountStore[userID]
+		acct.PushEvent(msg)
 		panic(msg)
 	}
 }
