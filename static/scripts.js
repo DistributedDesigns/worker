@@ -203,24 +203,34 @@ function SetBuyAmount() {
   }
 }
 function CancelSetBuy() {
-  SendPost("CANCEL_SET_BUY,"+localStorage["user"]+","+document.getElementById("cancelbuystocksymbol").value.toUpperCase())
-  console.log("Cancel set buy")
+  if(AmountCheck(SymbolCheck(document.getElementById("cancelbuystocksymbol").value))) {    
+    SendPost("CANCEL_SET_BUY,"+localStorage["user"]+","+document.getElementById("cancelbuystocksymbol").value.toUpperCase())
+    console.log("Cancel set buy")
+  }
 }
 function SetBuyTrigger() {
-  SendPost("SET_BUY_TRIGGER,"+localStorage["user"]+","+document.getElementById("setbuytrigstocksymbol").value.toUpperCase()+","+document.getElementById("setbuytrigamount").value)
-  console.log("Set buy trigger")
+  if(AmountCheck(SymbolCheck(document.getElementById("setbuytrigstocksymbol").value))) {    
+    SendPost("SET_BUY_TRIGGER,"+localStorage["user"]+","+document.getElementById("setbuytrigstocksymbol").value.toUpperCase()+","+document.getElementById("setbuytrigamount").value)
+    console.log("Set buy trigger")
+  }
 }
 function SetSellAmount() {
-  SendPost("SET_SELL_AMOUNT,"+localStorage["user"]+","+document.getElementById("setsellstocksymbol").value.toUpperCase()+","+document.getElementById("setsellamount").value)
-  console.log("Set Sell Amount")
+  if(AmountCheck(document.getElementById("setsellamount").value) && SymbolCheck(document.getElementById("setsellstocksymbol").value)){    
+    SendPost("SET_SELL_AMOUNT,"+localStorage["user"]+","+document.getElementById("setsellstocksymbol").value.toUpperCase()+","+document.getElementById("setsellamount").value)
+    console.log("Set Sell Amount")
+  }
 }
 function CancelSetSell() {
-  SendPost("CANCEL_SET_SELL,"+localStorage["user"]+","+document.getElementById("cancelsellstocksymbol").value.toUpperCase())
-  console.log("Cancel set sell")
+  if(AmountCheck(SymbolCheck(document.getElementById("cancelsellstocksymbol").value))) {    
+    SendPost("CANCEL_SET_SELL,"+localStorage["user"]+","+document.getElementById("cancelsellstocksymbol").value.toUpperCase())
+    console.log("Cancel set sell")
+  }
 }
 function SetSellTrigger() {
-  SendPost("SET_SELL_TRIGGER,"+localStorage["user"]+","+document.getElementById("setselltrigstocksymbol").value.toUpperCase()+","+document.getElementById("setselltrigamount").value)
-  console.log("Set sell trigger")
+  if(AmountCheck(SymbolCheck(document.getElementById("setselltrigstocksymbol").value))) {    
+    SendPost("SET_SELL_TRIGGER,"+localStorage["user"]+","+document.getElementById("setselltrigstocksymbol").value.toUpperCase()+","+document.getElementById("setselltrigamount").value)
+    console.log("Set sell trigger")
+  }
 }
 function Dumplog() {
   var userID = localStorage["user"]
