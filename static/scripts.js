@@ -72,6 +72,11 @@ function doAuth(rawData) {
             }
           }
           document.getElementById("portfolio").innerHTML = portfolioContainer.innerHTML
+
+          autoTxContainer = document.createElement("div")
+          userData["pendingATX"].map(function(elem) {
+            console.log(elem)
+          })
       };
   } else {
       var item = document.createElement("div");
