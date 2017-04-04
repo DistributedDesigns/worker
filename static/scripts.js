@@ -11,6 +11,9 @@ function appendLog(item) {
     var log = document.getElementById("log");
     var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
     log.appendChild(item);
+    if (doScroll) {
+        log.scrollTop = log.scrollHeight - log.clientHeight;
+    }
 }
 
 function doAuth(rawData) {
