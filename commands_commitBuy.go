@@ -15,11 +15,11 @@ type commitBuyCmd struct {
 
 func parseCommitBuyCmd(parts []string) commitBuyCmd {
 	if len(parts) != 3 {
-		abortTx("COMMIT_BUY needs 3 parts")
+		abortParse("COMMIT_BUY needs 3 parts")
 	}
 
 	id, err := strconv.ParseUint(parts[0], 10, 64)
-	abortTxOnError(err, "Could not parse ID")
+	abortParseOnError(err, "Could not parse ID")
 
 	return commitBuyCmd{
 		id:     id,
@@ -56,11 +56,11 @@ func (cb commitBuyCmd) Execute() {
 
 	acct := accountStore[cb.userID]
 	pendingBuy, err := acct.pendingBuys.Pop()
-	abortTxOnError(err, cb.Name()+" No pending buys")
+	abortTxOnError(err, cb.userID, cb.Name()+" No pending buys")
 
 	if pendingBuy.IsExpired() {
 		pendingBuy.RollBack()
-		abortTx(cb.Name() + " Buy expired")
+		abortTx(cb.userID, cb.Name()+" Buy expired")
 	}
 
 	pendingBuy.Commit()

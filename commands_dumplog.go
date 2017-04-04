@@ -20,11 +20,11 @@ type dumplogCmd struct {
 
 func parseDumplogCmd(parts []string) dumplogCmd {
 	if len(parts) < 3 {
-		abortTx("DUMPLOG needs at least 3 parts")
+		abortParse("DUMPLOG needs at least 3 parts")
 	}
 
 	id, err := strconv.ParseUint(parts[0], 10, 64)
-	abortTxOnError(err, "Could not parse ID")
+	abortParseOnError(err, "Could not parse ID")
 
 	// Dumplog is overloaded as
 	// 1) DUMPLOG,$filename
@@ -101,7 +101,7 @@ func (dl dumplogCmd) Execute() {
 	consoleLog.Debug("Dumplog requested as", dlr.Filename)
 
 	acct := accountStore[dl.userID]
-	acct.PushEvent("Wrote dumplog to " + dlr.Filename)
+	acct.PushEvent(fmt.Sprintf("Wrote dumplog to %s\nContact an admin to retrieve your file", dlr.Filename))
 	acct.AddSummaryItem("Finished " + dl.Name())
 
 	consoleLog.Notice(" [✔] Finished", dl.Name())

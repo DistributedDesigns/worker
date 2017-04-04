@@ -15,11 +15,11 @@ type cancelBuyCmd struct {
 
 func parseCancelBuyCmd(parts []string) cancelBuyCmd {
 	if len(parts) != 3 {
-		abortTx("CANCEL_BUY needs 3 parts")
+		abortParse("CANCEL_BUY needs 3 parts")
 	}
 
 	id, err := strconv.ParseUint(parts[0], 10, 64)
-	abortTxOnError(err, "Could not parse ID")
+	abortParseOnError(err, "Could not parse ID")
 
 	return cancelBuyCmd{
 		id:     id,
@@ -56,7 +56,7 @@ func (cb cancelBuyCmd) Execute() {
 
 	acct := accountStore[cb.userID]
 	pendingBuy, err := acct.pendingBuys.Pop()
-	abortTxOnError(err, cb.Name()+" No pending buys")
+	abortTxOnError(err, cb.userID, cb.Name()+" No pending buys")
 
 	pendingBuy.RollBack()
 

@@ -15,11 +15,11 @@ type displaySummaryCmd struct {
 
 func parseDisplaySummaryCmd(parts []string) displaySummaryCmd {
 	if len(parts) != 3 {
-		abortTx("DISPLAY_SUMMARY needs 3 parts")
+		abortParse("DISPLAY_SUMMARY needs 3 parts")
 	}
 
 	id, err := strconv.ParseUint(parts[0], 10, 64)
-	abortTxOnError(err, "Could not parse ID")
+	abortParseOnError(err, "Could not parse ID")
 
 	return displaySummaryCmd{
 		id:     id,

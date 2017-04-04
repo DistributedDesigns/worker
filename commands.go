@@ -23,7 +23,7 @@ func parseCommand(s string) command {
 	parts := strings.Split(csv, ",")
 
 	if len(parts) < 3 {
-		abortTx("Insufficient command arguments")
+		abortParse("Insufficient command arguments")
 	}
 
 	cmdType := parts[1]
@@ -63,7 +63,7 @@ func parseCommand(s string) command {
 	case "DUMPLOG":
 		parsedCommand = parseDumplogCmd(parts)
 	default:
-		abortTx(fmt.Sprintf("Unrecognized command %s: %+v", cmdType, parts))
+		abortParse(fmt.Sprintf("Unrecognized command %s: %+v", cmdType, parts))
 	}
 
 	return parsedCommand
