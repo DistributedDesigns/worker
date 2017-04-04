@@ -45,6 +45,33 @@ function doAuth(rawData) {
 
           userData = jsonData["account"]
           document.getElementById("balance").innerHTML = userData["balance"]
+
+          buyContainer = document.createElement("div")
+          userData["pendingBuys"].map(function(elem) {
+            var item = document.createElement("div");
+            item.innerText = "{" + elem.amount + "," + elem.expiresAt + "," + elem.stock + "}"
+            buyContainer.appendChild(item)
+          })
+          document.getElementById("pendingbuys").innerHTML = buyContainer.innerHTML
+
+          sellContainer = document.createElement("div")
+          userData["pendingSells"].map(function(elem) {
+            var item = document.createElement("div");
+            item.innerText = "{" + elem.amount + "," + elem.expiresAt + "," + elem.stock + "}"
+            sellContainer.appendChild(item)
+          })
+          document.getElementById("pendingsells").innerHTML = sellContainer.innerHTML
+          
+          portfolioContainer = document.createElement("div")
+          portfolio = userData["portfolio"]
+          for (var key in portfolio) {
+            if (portfolio.hasOwnProperty(key)) {
+              var item = document.createElement("div");
+              item.innerText = key + " -> " + portfolio[key];
+              portfolioContainer.appendChild(item)
+            }
+          }
+          document.getElementById("portfolio").innerHTML = portfolioContainer.innerHTML
       };
   } else {
       var item = document.createElement("div");
