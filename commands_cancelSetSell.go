@@ -16,11 +16,11 @@ type cancelSetSellCmd struct {
 
 func parseCancelSetSellCmd(parts []string) cancelSetSellCmd {
 	if len(parts) != 4 {
-		abortTx("CANCEL_SET_SELL needs 4 parts")
+		abortParse("CANCEL_SET_SELL needs 4 parts")
 	}
 
 	id, err := strconv.ParseUint(parts[0], 10, 64)
-	abortTxOnError(err, "Could not parse ID")
+	abortParseOnError(err, "Could not parse ID")
 
 	return cancelSetSellCmd{
 		id:     id,
@@ -63,5 +63,8 @@ func (css cancelSetSellCmd) Execute() {
 	delete(workATXStore, autoTxKey)
 	autoTxCancelChan <- autoTxKey
 	consoleLog.Debugf("Published aTx %v successfully", autoTxKey)
+
+	acct := accountStore[css.userID]
+	acct.AddSummaryItem("Finished " + css.Name())
 	consoleLog.Notice(" [✔] Finished", css.Name())
 }

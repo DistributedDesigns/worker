@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/distributeddesigns/currency"
+	"github.com/gorilla/websocket"
 )
 
 type portfolio map[string]uint64
@@ -96,20 +97,34 @@ func (ac *account) RemoveStock(stock string, quantity uint64) error {
 // PruneExpiredTxs will remove all pendingTxs that are expired
 func (ac *account) PruneExpiredTxs() {
 	ac.Lock()
-	ac.AddSummaryItem("Starting expired TX cleanup")
 	expiredBuys := ac.pendingBuys.SplitExpired()
 	expiredSells := ac.pendingSells.SplitExpired()
 	ac.Unlock()
 
-	for _, buy := range *expiredBuys {
-		buy.RollBack()
-	}
+	hasExpiredTxs := (!expiredBuys.IsEmpty() || !expiredSells.IsEmpty())
 
-	for _, sell := range *expiredSells {
-		sell.RollBack()
-	}
+	if hasExpiredTxs {
+		ac.AddSummaryItem("Starting expired TX cleanup")
 
-	ac.AddSummaryItem("Finished expired TX cleanup")
+		for _, buy := range *expiredBuys {
+			buy.RollBack()
+		}
+
+		for _, sell := range *expiredSells {
+			sell.RollBack()
+		}
+
+		ac.AddSummaryItem("Finished expired TX cleanup")
+	}
+}
+
+func (ac *account) PushEvent(message string) {
+	socket, found := userSocketmap[ac.userID]
+	if !found {
+		consoleLog.Errorf("User %s is not subscribed to a socket connection", ac.userID)
+		return
+	}
+	socket.WriteMessage(websocket.TextMessage, []byte(message))
 }
 
 type summaryItem struct {
@@ -123,6 +138,8 @@ func (ac *account) AddSummaryItem(s string) {
 	// we convert the ring to a slice.
 	ac.summary = ac.summary.Prev()
 	ac.summary.Value = summaryItem{time.Now(), s}
+
+	ac.PushEvent(s)
 }
 
 // GetSummary returns a list of the user's most recent account activities,

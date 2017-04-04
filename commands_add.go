@@ -17,14 +17,14 @@ type addCmd struct {
 
 func parseAddCmd(parts []string) addCmd {
 	if len(parts) != 4 {
-		abortTx("ADD needs 4 parts")
+		abortParse("ADD needs 4 parts")
 	}
 
 	txID, err := strconv.ParseUint(parts[0], 10, 64)
-	abortTxOnError(err, "Could not parse ID")
+	abortParseOnError(err, "Could not parse ID")
 
 	amount, err := currency.NewFromString(parts[3])
-	abortTxOnError(err, "Could not parse amount in transaction")
+	abortParseOnError(err, "Could not parse amount in transaction")
 
 	return addCmd{
 		id:     txID,

@@ -161,6 +161,7 @@ var config struct {
 	} `yaml:"quote policy"`
 
 	CleanupInterval int `yaml:"cleanup interval"`
+	WebSocketPort   int `yaml:"websocket port"`
 }
 
 func loadConfig() {
