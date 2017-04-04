@@ -29,18 +29,20 @@ function doAuth(rawData) {
         conn.send(localStorage["user"])
       }
       conn.onclose = function (evt) {
-          conn.send("MY ASS")
           var item = document.createElement("div");
           item.innerHTML = "<b>Connection closed.</b>";
           appendLog(item);
       };
       conn.onmessage = function (evt) {
-          var messages = evt.data.split('\n');
+          jsonData = JSON.parse(evt.data)
+          var messages = jsonData["message"].split('\n');
           for (var i = 0; i < messages.length; i++) {
               var item = document.createElement("div");
               item.innerText = messages[i];
               appendLog(item);
           }
+          userData = jsonData["account"].split(",")
+          document.getElementById("balance").innerHTML = userData[1]
       };
   } else {
       var item = document.createElement("div");

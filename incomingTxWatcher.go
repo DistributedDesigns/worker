@@ -114,6 +114,8 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		consoleLog.Infof("Creating account for %s", userID)
 		accountStore[userID] = newAccountForUser(userID)
 	}
+	accountStore[userID].PushEvent("") //shove for userdata
+	//conn.WriteMessage(websocket.TextMessage, []byte(`{"account": "`+accountStore[userID].toCSV()+`", "message": null}`))
 }
 
 func incomingTxWatcher() {

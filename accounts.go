@@ -39,6 +39,10 @@ func newAccountForUser(userID string) *account {
 	return &ac
 }
 
+func (ac *account) toCSV() string {
+	return fmt.Sprintf("%s,%.2f", ac.userID, ac.balance.ToFloat())
+}
+
 // AddFunds : Increases the balance of the account
 func (ac *account) AddFunds(amount currency.Currency) {
 	consoleLog.Debugf("Old balance for %s is %s", ac.userID, ac.balance)
@@ -118,13 +122,19 @@ func (ac *account) PruneExpiredTxs() {
 	}
 }
 
+func genResponseJSON(actCSV string, message string) string {
+	return `{"account": "` + actCSV + `", "message": "` + message + `"}`
+}
+
 func (ac *account) PushEvent(message string) {
 	socket, found := userSocketmap[ac.userID]
 	if !found {
 		consoleLog.Errorf("User %s is not subscribed to a socket connection", ac.userID)
 		return
 	}
-	socket.WriteMessage(websocket.TextMessage, []byte(message))
+
+	//socket.WriteMessage(websocket.TextMessage, []byte(message))
+	socket.WriteMessage(websocket.TextMessage, []byte(genResponseJSON(ac.toCSV(), message)))
 }
 
 type summaryItem struct {
