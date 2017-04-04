@@ -1,0 +1,44 @@
+div form, div h2 {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+#log {
+  height: 32em;
+  margin: 10px;
+  overflow-y: scroll;
+}
+
+#userinfocontainer {
+  height: 25em;
+  width: 60%;
+}
+
+
+
+.cmdwrapper {
+  float: left; 
+  width: 30%; 
+  margin: 5px 20px;
+  height: 100%;
+  overflow-y: scroll;
+}
+
+#authview {
+  display: none;
+  height: 66.5em;
+}
+
+#loginview {
+  display: none; 
+  margin: 5px 20px;
+}
+
+#statwrapper {
+  float: right;
+  width: 65%;
+}
+
+#userid, #pwd {
+  width: 200px;
+}

@@ -5,245 +5,28 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="styles.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="scripts.js"></script>
 </head>
 <body>
-<script type="text/javascript">
-// window.onload = function () {
-//     // This should occur on response 200 from login
-//     var conn;
-//     var msg = document.getElementById("msg");
-//     var log = document.getElementById("log");
-//     function appendLog(item) {
-//         var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
-//         log.appendChild(item);
-//         if (doScroll) {
-//             log.scrollTop = log.scrollHeight - log.clientHeight;
-//         }
-//     }
-//     document.getElementById("form").onsubmit = function () {
-//         if (!conn) {
-//             return false;
-//         }
-//         if (!msg.value) {
-//             return false;
-//         }
-//         conn.send(msg.value);
-//         msg.value = "";
-//         return false;
-//     };
-//     if (window["WebSocket"]) {
-//         conn = new WebSocket("ws://" + document.location.host + "/ws");
-//         conn.onopen = function (evt) {
-//           conn.send("Bob")
-//         }
-//         conn.onclose = function (evt) {
-//             var item = document.createElement("div");
-//             item.innerHTML = "<b>Connection closed.</b>";
-//             appendLog(item);
-//         };
-//         conn.onmessage = function (evt) {
-//             var messages = evt.data.split('\n');
-//             for (var i = 0; i < messages.length; i++) {
-//                 var item = document.createElement("div");
-//                 item.innerText = messages[i];
-//                 appendLog(item);
-//             }
-//         };
-//     } else {
-//         var item = document.createElement("div");
-//         item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
-//         appendLog(item);
-//     }
-// };
-function SendPost(theCommand) {
-  var url = '/push';
-  var request = new XMLHttpRequest();
-  request.open("POST", url, true);
-
-  var jsonPayload = JSON.stringify({command: theCommand})
-  request.send(jsonPayload);
-}
-
-function appendLog(item) {
-    var log = document.getElementById("log");
-    var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
-    log.appendChild(item);
-}
-
-function doAuth(rawData) {
-  localStorage["user"] = localStorage["user"] || document.getElementById("userid").value
-  document.getElementById('loginview').style.display = 'none';
-  document.getElementById('authview').style.display = 'block';
-  var conn;
-  var msg = document.getElementById("msg");
-  if (window["WebSocket"]) {
-      conn = new WebSocket("ws://" + document.location.host + "/ws");
-      conn.onopen = function (evt) {
-        console.log("CON OPEN")
-        conn.send(localStorage["user"])
-      }
-      conn.onclose = function (evt) {
-          conn.send("MY ASS")
-          var item = document.createElement("div");
-          item.innerHTML = "<b>Connection closed.</b>";
-          appendLog(item);
-      };
-      conn.onmessage = function (evt) {
-          var messages = evt.data.split('\n');
-          for (var i = 0; i < messages.length; i++) {
-              var item = document.createElement("div");
-              item.innerText = messages[i];
-              appendLog(item);
-          }
-      };
-  } else {
-      var item = document.createElement("div");
-      item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
-      appendLog(item);
-  }
-  console.log("Auth Successful")
-}
-function Auth() {
-  var request = new XMLHttpRequest();
-  request.open('POST', '/auth', true);
-
-  request.onload = function() {
-    if (request.status >= 200 && request.status < 400) {
-      // Success!
-      // var data = request.responseText;
-      // console.log(data)
-      doAuth(request.responseText)
-    } else {
-      // We reached our target server, but it returned an error
-      console.log("Failed to Auth user")
-    }
-  };
-
-  request.onerror = function() {
-    // There was a connection error of some sort
-  };
-
-  request.send(JSON.stringify({user: document.getElementById("userid").value, pass: document.getElementById("pwd").value}));
-}
-function Create() {
-  var request = new XMLHttpRequest();
-  request.open('POST', '/create', true);
-
-  request.onload = function() {
-    if (request.status >= 200 && request.status < 400) {
-      // Success!
-      // var data = request.responseText;
-      // console.log(data)
-      doAuth(request.responseText)
-      console.log("Create Successful")
-    } else {
-      // We reached our target server, but it returned an error
-      console.log("Failed to create user")
-    }
-  };
-
-  request.onerror = function() {
-    // There was a connection error of some sort
-  };
-
-  request.send(JSON.stringify({user: document.getElementById("userid").value, pass: document.getElementById("pwd").value}));
-}
-function Logout() {
-  localStorage.clear()
-  location.reload()
-}
-function Add() {
-  SendPost("ADD,"+localStorage["user"]+","+document.getElementById("addamount").value)
-  console.log("Add")
-}
-function Quote() {
-  SendPost("QUOTE,"+localStorage["user"]+","+document.getElementById("quotestocksymbol").value.toUpperCase())
-  console.log("Quote")
-}
-function Buy() {
-  SendPost("BUY,"+localStorage["user"]+","+document.getElementById("buystocksymbol").value.toUpperCase()+","+document.getElementById("buyamount").value)
-  console.log("Buy")
-}
-function CommitBuy() {
-  SendPost("COMMIT_BUY,"+localStorage["user"])
-  console.log("Commit Buy")
-}
-function CancelBuy() {
-  SendPost("CANCEL_BUY,"+localStorage["user"])
-  console.log("Cancel Buy")
-}
-function Sell() {
-  SendPost("SELL,"+localStorage["user"]+","+document.getElementById("sellstocksymbol").value.toUpperCase()+","+document.getElementById("sellamount").value)
-  console.log("Sell")
-}
-function CommitSell() {
-  SendPost("COMMIT_SELL,"+localStorage["user"])
-  console.log("Commit Sell")
-}
-function CancelSell() {
-  SendPost("CANCEL_SELL,"+localStorage["user"])
-  console.log("Cancel Sell")
-}
-function SetBuyAmount() {
-  SendPost("SET_BUY_AMOUNT,"+localStorage["user"]+","+document.getElementById("setbuystocksymbol").value.toUpperCase()+","+document.getElementById("setbuyamount").value)
-  console.log("Set buy amount")
-}
-function CancelSetBuy() {
-  SendPost("CANCEL_SET_BUY,"+localStorage["user"]+","+document.getElementById("cancelbuystocksymbol").value.toUpperCase())
-  console.log("Cancel set buy")
-}
-function SetBuyTrigger() {
-  SendPost("SET_BUY_TRIGGER,"+localStorage["user"]+","+document.getElementById("setbuytrigstocksymbol").value.toUpperCase()+","+document.getElementById("setbuytrigamount").value)
-  console.log("Set buy trigger")
-}
-function SetSellAmount() {
-  SendPost("SET_SELL_AMOUNT,"+localStorage["user"]+","+document.getElementById("setsellstocksymbol").value.toUpperCase()+","+document.getElementById("setsellamount").value)
-  console.log("Set Sell Amount")
-}
-function CancelSetSell() {
-  SendPost("CANCEL_SET_SELL,"+localStorage["user"]+","+document.getElementById("cancelsellstocksymbol").value.toUpperCase())
-  console.log("Cancel set sell")
-}
-function SetSellTrigger() {
-  SendPost("SET_SELL_TRIGGER,"+localStorage["user"]+","+document.getElementById("setselltrigstocksymbol").value.toUpperCase()+","+document.getElementById("setselltrigamount").value)
-  console.log("Set sell trigger")
-}
-function Dumplog() {
-  var userID = localStorage["user"]
-  if(userID === "admin"){
-    SendPost("DUMPLOG,out.dump")
-    console.log("Admin Dump")
-  }
-  else
-  {
-    SendPost("DUMPLOG,"+localStorage["user"]+","+document.getElementById("dumplogfile").value)
-    console.log("User Dump")
-  }
-}
-function DisplaySummary() {
-  SendPost("DISPLAY_SUMMARY,"+localStorage["user"])
-  console.log("Display summary")
-}
-</script>
 <div id="container">
-  <form id="loginview" style="display: none; margin: 5px 20px;">
+  <form id="loginview">
     <h2>Credentials:</h2>
     <div class="form-group">
       <label for="userid">User ID:</label>
-      <input type="text" class="form-control" id="userid" placeholder="Enter user ID" style="width: 200px">
+      <input type="text" class="form-control" id="userid" placeholder="Enter user ID">
     </div>
     <div class="form-group">
       <label for="pwd">Password:</label>
-      <input type="password" class="form-control" id="pwd" placeholder="Enter password" style="width: 200px">
+      <input type="password" class="form-control" id="pwd" placeholder="Enter password">
     </div>
     <button type="button" class="btn btn-default" onclick="Create()">Create</button>
     <button type="button" class="btn btn-default" onclick="Auth()">Log In</button>
   </form>
-  <div id="authview" style="display: none;">
-    <div style="float: left; width: 30%; margin: 5px 20px;">
-
+  <div id="authview">
+    <div class="cmdwrapper">
       <h2>Logout:</h2>
       <form>
         <button type="button" class="btn btn-default" onclick="Logout()">Logout</button>
@@ -397,8 +180,22 @@ function DisplaySummary() {
         <button type="button" class="btn btn-default" onclick="DisplaySummary()">Submit</button>
       </form>
     </div>
-    <div id="log" style="float: right; width: 60%; margin: 10px;">
-      <h2> Output: </h2>
+    <div id="statwrapper">
+      <div id="userstat">
+        <h2> User Info: </h2>
+        <div id="userinfocontainer">
+          <div> Balance: <p id="balance">0.00</p> </div>
+          <div> PendingBuys: <div id="pendingbuys"></div> </div>
+          <div> PendingSells: <div id="pendingsells"></div> </div>
+          <div> Portfolio: <div id="portfolio"></div> </div>
+          <div> AutoTx: <div id="autotx"></div> </div>
+        </div>
+      </div>
+      <div id="logwrapper">
+        <h2 id="outputheader"> Output: </h2>
+        <div id="log">
+        </div>
+      </div>
     </div>
   </div>
 </div>

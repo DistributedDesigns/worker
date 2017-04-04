@@ -69,7 +69,7 @@ func receiveAutoTx() {
 		autoTxFilled, err := types.ParseAutoTxFilled(string(d.Body[:]))
 		failOnError(err, "Failed to parse autoTxInit")
 		consoleLog.Debugf("AutoTxFilled is : %+v\n", autoTxFilled)
-		fulfilAutoTx(autoTxFilled)
+		updateAccount(autoTxFilled)
 	}
 	fmt.Printf("AutoTxWorker Receiver Spinning\n")
 }
