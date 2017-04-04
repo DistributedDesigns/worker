@@ -35,7 +35,6 @@ function doAuth(rawData) {
       };
       conn.onmessage = function (evt) {
           jsonData = JSON.parse(evt.data)
-          console.log(jsonData);
 
           message = jsonData["message"]
           if (message !== "") {
