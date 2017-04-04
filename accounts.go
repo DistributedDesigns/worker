@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/distributeddesigns/currency"
+	types "github.com/distributeddesigns/shared_types"
 	"github.com/gorilla/websocket"
 )
 
@@ -123,11 +124,28 @@ func (ac *account) PruneExpiredTxs() {
 	}
 }
 
+type pendingATXState struct {
+	Stock   string `json:"stock"`
+	Amount  string `json:"amount"`
+	Trigger string `json:"trigger"`
+	Action  string `json:"action"`
+}
+
+func serializeATX(autoTx types.AutoTxInit) pendingATXState {
+	return pendingATXState{
+		Stock:   autoTx.AutoTxKey.Stock,
+		Action:  autoTx.AutoTxKey.Action,
+		Amount:  autoTx.Amount.String(),
+		Trigger: autoTx.Trigger.String(),
+	}
+}
+
 type accountState struct {
 	Balance      string            `json:"balance"`
 	Portfolio    map[string]uint64 `json:"portfolio"`
 	PendingBuys  []pendingTxState  `json:"pendingBuys"`
 	PendingSells []pendingTxState  `json:"pendingSells"`
+	AutoTx       []pendingATXState `json:"pendingATX"`
 }
 
 func (ac *account) GetState() accountState {
@@ -141,11 +159,20 @@ func (ac *account) GetState() accountState {
 		pendingSells[i] = ps.GetState()
 	}
 
+	pendingATX := make([]pendingATXState, 0)
+	for k, v := range workATXStore {
+		if k.UserID == ac.userID {
+			serTx := serializeATX(v)
+			pendingATX = append(pendingATX, serTx)
+		}
+	}
+
 	return accountState{
 		Balance:      ac.balance.String(),
 		Portfolio:    ac.portfolio,
 		PendingBuys:  pendingBuys,
 		PendingSells: pendingSells,
+		AutoTx:       pendingATX,
 	}
 }
 
