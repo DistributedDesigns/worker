@@ -101,7 +101,7 @@ func (dl dumplogCmd) Execute() {
 	consoleLog.Debug("Dumplog requested as", dlr.Filename)
 
 	acct := accountStore[dl.userID]
-	acct.PushEvent("Wrote dumplog to " + dlr.Filename)
+	acct.PushEvent(fmt.Sprintf("Wrote dumplog to %s\nContact an admin to retrieve your file", dlr.Filename))
 	acct.AddSummaryItem("Finished " + dl.Name())
 
 	consoleLog.Notice(" [✔] Finished", dl.Name())

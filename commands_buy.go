@@ -117,6 +117,7 @@ func (b buyCmd) Execute() {
 	abortTxOnError(err, b.userID, "This should be impossible!")
 	acct.pendingBuys.Push(b)
 
+	acct.PushEvent(fmt.Sprintf("Want to buy %d of %s for %s", b.quantityToBuy, b.stock, b.purchaseAmount))
 	acct.AddSummaryItem("Finished " + b.Name())
 	consoleLog.Notice(" [✔] Finished", b.Name())
 }

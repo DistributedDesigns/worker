@@ -218,7 +218,7 @@ function Dumplog() {
   }
   else
   {
-    SendPost("DUMPLOG"+localStorage["user"]+","+document.getElementById("dumplogfile").value)
+    SendPost("DUMPLOG,"+localStorage["user"]+","+document.getElementById("dumplogfile").value)
     console.log("User Dump")
   }
 }

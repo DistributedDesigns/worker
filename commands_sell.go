@@ -94,6 +94,7 @@ func (s sellCmd) Execute() {
 		consoleLog.Info(" [!] Getting a fresh quote for", s.Name())
 		qr.AllowCache = false
 		q = getQuote(qr)
+		acct.PushEvent(fmt.Sprintf("New value for %s is %s", q.Stock, q.Price))
 	}
 
 	// Check if user can sell stock at quote price
@@ -116,6 +117,7 @@ func (s sellCmd) Execute() {
 	abortTxOnError(err, s.userID, s.Name())
 	acct.pendingSells.Push(s)
 
+	acct.PushEvent(fmt.Sprintf("Want to sell %d of %s for %s", s.quantityToSell, s.stock, s.profit))
 	acct.AddSummaryItem("Finished " + s.Name())
 	consoleLog.Notice(" [✔] Finished", s.Name())
 }
