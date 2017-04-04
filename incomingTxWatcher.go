@@ -102,13 +102,18 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// frontend handshake to get user and hook them into the userMap for sockets
 	_, message, err := conn.ReadMessage()
+	userID := string(message)
 	failOnError(err, "Failed to handshake")
-	fmt.Printf("Handshake from client is %s\n", message)
-	userSocket, found := userSocketmap[string(message)]
+	fmt.Printf("Handshake from client is %s\n", userID)
+	userSocket, found := userSocketmap[string(userID)]
 	if found {
 		userSocket.Close()
 	}
-	userSocketmap[string(message)] = conn
+	userSocketmap[string(userID)] = conn
+	if _, accountExists := accountStore[userID]; !accountExists {
+		consoleLog.Infof("Creating account for %s", userID)
+		accountStore[userID] = newAccountForUser(userID)
+	}
 }
 
 func incomingTxWatcher() {

@@ -1,0 +1,29 @@
+div form, div h2 {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+#log {
+  float: right; 
+  width: 60%; 
+  margin: 10px;
+}
+
+.cmdwrapper {
+  float: left; 
+  width: 30%; 
+  margin: 5px 20px;
+}
+
+#authview {
+  display: none;
+}
+
+#loginview {
+  display: none; 
+  margin: 5px 20px;
+}
+
+#userid, #pwd {
+  width: 200px;
+}
