@@ -43,7 +43,7 @@ func sendAutoTx() {
 					failOnError(err, "Failed to parse currency")
 				} else {
 					numStock, remCash := autoTxInit.Trigger.FitsInto(autoTxInit.Amount) // amount of stock we reserved from their port
-					filledCash := quote.Price
+					filledCash = quote.Price
 					err = filledCash.Mul(float64(numStock))
 					filledCash.Add(remCash) // Re-add the unfilled value
 					filledStock = 0
