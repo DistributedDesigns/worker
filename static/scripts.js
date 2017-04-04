@@ -125,21 +125,54 @@ function Create() {
 
   request.send(JSON.stringify({user: document.getElementById("userid").value, pass: document.getElementById("pwd").value}));
 }
+
+function AmountCheck(theAmount){
+  var reg = /^\d+\.?(\d\d)?$/
+  if (reg.test(document.getElementById("addamount").value)) {
+    return true
+  }
+  else{
+    var item = document.createElement("div");
+    item.innerText = "Invalid input for amount. Expected format example: '100.00'"
+    appendLog(item)
+    return false
+  }
+}
+
+function SymbolCheck(theStockSymbol){
+  var reg = /^[A-Z][A-Z][A-Z]$/
+  if (reg.test(theStockSymbol)) {
+    return true
+  }
+  else{
+    var item = document.createElement("div");
+    item.innerText = "Invalid input for stock symbol. Expected 3 letter upper string.  Format example: 'ASS'"
+    appendLog(item)
+    return false
+  }
+}
+
 function Logout() {
   localStorage.clear()
   location.reload()
 }
 function Add() {
-  SendPost("ADD,"+localStorage["user"]+","+document.getElementById("addamount").value)
-  console.log("Add")
+  if (AmountCheck(document.getElementById("addamount").value)) {
+    SendPost("ADD,"+localStorage["user"]+","+document.getElementById("addamount").value)
+    console.log("Add")
+  }
 }
 function Quote() {
-  SendPost("QUOTE,"+localStorage["user"]+","+document.getElementById("quotestocksymbol").value.toUpperCase())
-  console.log("Quote")
+  if (SymbolCheck(document.getElementById("quotestocksymbol").value)) {
+    SendPost("QUOTE,"+localStorage["user"]+","+document.getElementById("quotestocksymbol").value.toUpperCase())
+    console.log("Quote")
+  }  
 }
 function Buy() {
-  SendPost("BUY,"+localStorage["user"]+","+document.getElementById("buystocksymbol").value.toUpperCase()+","+document.getElementById("buyamount").value)
-  console.log("Buy")
+  if(AmountCheck(document.getElementById("buyamount").value) && SymbolCheck(document.getElementById("buystocksymbol").value)){
+    SendPost("BUY,"+localStorage["user"]+","+document.getElementById("buystocksymbol").value.toUpperCase()+","+document.getElementById("buyamount").value)
+    console.log("Buy")
+  }
 }
 function CommitBuy() {
   SendPost("COMMIT_BUY,"+localStorage["user"])
@@ -150,8 +183,10 @@ function CancelBuy() {
   console.log("Cancel Buy")
 }
 function Sell() {
-  SendPost("SELL,"+localStorage["user"]+","+document.getElementById("sellstocksymbol").value.toUpperCase()+","+document.getElementById("sellamount").value)
-  console.log("Sell")
+  if(AmountCheck(document.getElementById("sellamount").value) && SymbolCheck(document.getElementById("sellstocksymbol").value)){    
+    SendPost("SELL,"+localStorage["user"]+","+document.getElementById("sellstocksymbol").value.toUpperCase()+","+document.getElementById("sellamount").value)
+    console.log("Sell")
+  }
 }
 function CommitSell() {
   SendPost("COMMIT_SELL,"+localStorage["user"])
@@ -162,8 +197,10 @@ function CancelSell() {
   console.log("Cancel Sell")
 }
 function SetBuyAmount() {
-  SendPost("SET_BUY_AMOUNT,"+localStorage["user"]+","+document.getElementById("setbuystocksymbol").value.toUpperCase()+","+document.getElementById("setbuyamount").value)
-  console.log("Set buy amount")
+  if(AmountCheck(document.getElementById("setbuyamount").value) && SymbolCheck(document.getElementById("setbuystocksymbol").value)){    
+    SendPost("SET_BUY_AMOUNT,"+localStorage["user"]+","+document.getElementById("setbuystocksymbol").value.toUpperCase()+","+document.getElementById("setbuyamount").value)
+    console.log("Set buy amount")
+  }
 }
 function CancelSetBuy() {
   SendPost("CANCEL_SET_BUY,"+localStorage["user"]+","+document.getElementById("cancelbuystocksymbol").value.toUpperCase())
