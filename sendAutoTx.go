@@ -6,12 +6,11 @@ import (
 	"github.com/streadway/amqp"
 )
 
-func fulfilAutoTx(autoTxFilled types.AutoTxFilled) {
-	return
-}
-
 func updateAccount(autoTxFilled types.AutoTxFilled) {
-	// TODO: Do account add and lock here, needs rebase
+	accountStore[autoTxFilled.AutoTxKey.UserID].Lock()
+	accountStore[autoTxFilled.AutoTxKey.UserID].AddFunds(autoTxFilled.AddFunds)
+	accountStore[autoTxFilled.AutoTxKey.UserID].AddStock(autoTxFilled.AutoTxKey.Stock, uint64(autoTxFilled.AddStocks))
+	accountStore[autoTxFilled.AutoTxKey.UserID].Unlock()
 	return
 }
 
@@ -37,12 +36,23 @@ func sendAutoTx() {
 			}
 
 			if validTrigger {
-				// TODO: DO MATH FOR FILLED TRANS
-				curr, err := currency.NewFromFloat(0.00)
-				failOnError(err, "Failed to parse currency")
+				var filledStock uint
+				var filledCash currency.Currency
+				if autoTxKey.Action == "Buy" {
+					filledStock, filledCash = quote.Price.FitsInto(autoTxInit.Amount)
+					failOnError(err, "Failed to parse currency")
+				} else {
+					numStock, remCash := autoTxInit.Trigger.FitsInto(autoTxInit.Amount) // amount of stock we reserved from their port
+					filledCash := quote.Price
+					err = filledCash.Mul(float64(numStock))
+					filledCash.Add(remCash) // Re-add the unfilled value
+					filledStock = 0
+					failOnError(err, "Failed to parse currency")
+				}
+
 				autoTxFilled := types.AutoTxFilled{
-					AddFunds:  curr,
-					AddStocks: uint(0),
+					AddFunds:  filledCash,
+					AddStocks: filledStock,
 					AutoTxKey: autoTxKey,
 				}
 				updateAccount(autoTxFilled)
