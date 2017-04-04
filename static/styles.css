@@ -4,10 +4,17 @@ div form, div h2 {
 }
 
 #log {
-  float: right; 
-  width: 60%; 
+  height: 32em;
   margin: 10px;
+  overflow-y: scroll;
 }
+
+#userinfocontainer {
+  height: 25em;
+  width: 60%;
+}
+
+
 
 .cmdwrapper {
   float: left; 
@@ -25,6 +32,11 @@ div form, div h2 {
 #loginview {
   display: none; 
   margin: 5px 20px;
+}
+
+#statwrapper {
+  float: right;
+  width: 65%;
 }
 
 #userid, #pwd {
