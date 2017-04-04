@@ -75,8 +75,11 @@ function doAuth(rawData) {
 
           autoTxContainer = document.createElement("div")
           userData["pendingATX"].map(function(elem) {
-            console.log(elem)
+            var item = document.createElement("div");
+            item.innerText = "{" + elem.stock + "," + elem.amount + "," + elem.trigger + "," + elem.action +  "}"
+            autoTxContainer.appendChild(item)
           })
+          document.getElementById("autotx").innerHTML = autoTxContainer.innerHTML
       };
   } else {
       var item = document.createElement("div");
