@@ -143,3 +143,11 @@ func (s sellCmd) RollBack() {
 func (s sellCmd) IsExpired() bool {
 	return time.Now().After(s.expiresAt)
 }
+
+func (s sellCmd) GetState() pendingTxState {
+	return pendingTxState{
+		Stock:     s.stock,
+		Amount:    s.profit.String(),
+		ExpiresAt: s.expiresAt.Format("15:04:05 Jan _2"),
+	}
+}

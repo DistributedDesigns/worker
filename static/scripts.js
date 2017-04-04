@@ -35,14 +35,16 @@ function doAuth(rawData) {
       };
       conn.onmessage = function (evt) {
           jsonData = JSON.parse(evt.data)
-          var messages = jsonData["message"].split('\n');
-          for (var i = 0; i < messages.length; i++) {
-              var item = document.createElement("div");
-              item.innerText = messages[i];
-              appendLog(item);
+
+          message = jsonData["message"]
+          if (message !== "") {
+            var item = document.createElement("div");
+            item.innerText = message;
+            appendLog(item)
           }
-          userData = jsonData["account"].split(",")
-          document.getElementById("balance").innerHTML = userData[1]
+
+          userData = jsonData["account"]
+          document.getElementById("balance").innerHTML = userData["balance"]
       };
   } else {
       var item = document.createElement("div");

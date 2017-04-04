@@ -2,6 +2,7 @@ package main
 
 import (
 	"container/ring"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sync"
@@ -122,8 +123,35 @@ func (ac *account) PruneExpiredTxs() {
 	}
 }
 
-func genResponseJSON(actCSV string, message string) string {
-	return `{"account": "` + actCSV + `", "message": "` + message + `"}`
+type accountState struct {
+	Balance      string            `json:"balance"`
+	Portfolio    map[string]uint64 `json:"portfolio"`
+	PendingBuys  []pendingTxState  `json:"pendingBuys"`
+	PendingSells []pendingTxState  `json:"pendingSells"`
+}
+
+func (ac *account) GetState() accountState {
+	pendingBuys := make([]pendingTxState, len(ac.pendingBuys))
+	for i, pb := range ac.pendingBuys {
+		pendingBuys[i] = pb.GetState()
+	}
+
+	pendingSells := make([]pendingTxState, len(ac.pendingSells))
+	for i, ps := range ac.pendingSells {
+		pendingSells[i] = ps.GetState()
+	}
+
+	return accountState{
+		Balance:      ac.balance.String(),
+		Portfolio:    ac.portfolio,
+		PendingBuys:  pendingBuys,
+		PendingSells: pendingSells,
+	}
+}
+
+type eventMessage struct {
+	Account accountState `json:"account"`
+	Message string       `json:"message"`
 }
 
 func (ac *account) PushEvent(message string) {
@@ -133,8 +161,13 @@ func (ac *account) PushEvent(message string) {
 		return
 	}
 
-	//socket.WriteMessage(websocket.TextMessage, []byte(message))
-	socket.WriteMessage(websocket.TextMessage, []byte(genResponseJSON(ac.toCSV(), message)))
+	payload, err := json.Marshal(&eventMessage{ac.GetState(), message})
+	if err != nil {
+		consoleLog.Errorf("Failed to json-ify %+v, %s", ac, message)
+		return
+	}
+
+	socket.WriteMessage(websocket.TextMessage, payload)
 }
 
 type summaryItem struct {
