@@ -13,10 +13,13 @@ div form, div h2 {
   float: left; 
   width: 30%; 
   margin: 5px 20px;
+  height: 100%;
+  overflow-y: scroll;
 }
 
 #authview {
   display: none;
+  height: 66.5em;
 }
 
 #loginview {
