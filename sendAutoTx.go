@@ -6,10 +6,6 @@ import (
 	"github.com/streadway/amqp"
 )
 
-func fulfilAutoTx(autoTxFilled types.AutoTxFilled) {
-	return
-}
-
 func updateAccount(autoTxFilled types.AutoTxFilled) {
 	// TODO: Do account add and lock here, needs rebase
 	return
