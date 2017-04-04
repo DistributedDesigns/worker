@@ -114,7 +114,7 @@ func (s sellCmd) Execute() {
 	s.expiresAt = q.Timestamp.Add(time.Second * 60)
 
 	err := acct.RemoveStock(s.stock, s.quantityToSell)
-	abortTxOnError(err, s.userID, s.Name())
+	abortTxOnError(err, s.userID, s.Name()+" User does not have enough stock to sell")
 	acct.pendingSells.Push(s)
 
 	acct.PushEvent(fmt.Sprintf("Want to sell %d of %s for %s", s.quantityToSell, s.stock, s.profit))
